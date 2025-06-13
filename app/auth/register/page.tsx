@@ -5,7 +5,7 @@ import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen">
       <Image
@@ -16,34 +16,55 @@ export default function LoginPage() {
         priority
       />
       <Card className="mt-4 w-xl">
-        <h2 className="text-2xl font-bold text-center">Daftar Akun</h2>
+        <h2 className="text-2xl font-bold text-center">Daftar Akun</h2>{" "}
         <p className="text-gray-600 text-center">
-          Masukkan email & kata sandi untuk mendaftar
+          Lengkapi data untuk mendaftar akun baru
         </p>
-        <form className="mt-4">
-          <label htmlFor="name" className="block mb-2 font-semibold">
-            Nama Lengkap
-          </label>
-          <Input type="text" id="name" placeholder="Nama Lengkap" className="mb-4" />
+        <form className="mt-4 space-y-4">
+          <div>
+            <label htmlFor="fullName" className="block mb-2 font-semibold">
+              Nama Lengkap
+            </label>
+            <Input type="text" id="fullName" placeholder="Nama Lengkap" />
+          </div>
 
-          <label htmlFor="email" className="block mb-2 font-semibold">
-            Email
-          </label>
-          <Input type="email" id="email" placeholder="Email" className="mb-4" />
+          <div>
+            <label htmlFor="email" className="block mb-2 font-semibold">
+              Email
+            </label>
+            <Input type="email" id="email" placeholder="Email" />
+          </div>
 
-          <label htmlFor="password" className="block mb-2 font-semibold">
-            Kata Sandi
-          </label>
-          <Input
-            type="password"
-            id="password"
-            placeholder="Kata Sandi"
-            className="mb-4"
-          />
-          <Button type="submit" className="w-full">Daftar</Button>
+          <div>
+            <label htmlFor="password" className="block mb-2 font-semibold">
+              Kata Sandi
+            </label>
+            <Input type="password" id="password" placeholder="Kata Sandi" />
+          </div>
+
+          <div>
+            <label
+              htmlFor="confirmPassword"
+              className="block mb-2 font-semibold"
+            >
+              Konfirmasi Kata Sandi
+            </label>
+            <Input
+              type="password"
+              id="confirmPassword"
+              placeholder="Konfirmasi Kata Sandi"
+            />
+          </div>
+
+          <Button type="submit" className="w-full">
+            Daftar
+          </Button>
         </form>
         <p className="text-sm text-gray-500 mt-4 text-center">
-          Sudah punya akun? <Link href="/auth/login" className="font-semibold text-blue-500">Masuk</Link>
+          Sudah punya akun?{" "}
+          <Link href="/auth/login" className="font-semibold text-blue-500">
+            Masuk
+          </Link>
         </p>
       </Card>
     </main>

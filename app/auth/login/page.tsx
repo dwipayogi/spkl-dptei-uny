@@ -21,24 +21,36 @@ export default function LoginPage() {
           Masukkan email & kata sandi untuk login
         </p>
         <form className="mt-4">
-          <label htmlFor="email" className="block mb-2 font-semibold">
-            Email
-          </label>
-          <Input type="email" id="email" placeholder="Email" className="mb-4" />
 
-          <label htmlFor="password" className="block mb-2 font-semibold">
-            Kata Sandi
-          </label>
-          <Input
-            type="password"
-            id="password"
-            placeholder="Kata Sandi"
-            className="mb-4"
-          />
-          <Button type="submit" className="w-full">Login</Button>
+          <div>
+            <label htmlFor="email" className="block mb-2 font-semibold">
+              Email
+            </label>
+            <Input type="email" id="email" placeholder="Email" className="mb-4" />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block mb-2 font-semibold">
+              Kata Sandi
+            </label>
+            <Input
+              type="password"
+              id="password"
+              placeholder="Kata Sandi"
+              className="mb-4"
+            />
+          </div>
+
+          <Button type="submit" className="w-full">
+            Login
+          </Button>
         </form>
+        
         <p className="text-sm text-gray-500 mt-4 text-center">
-          Belum punya akun? <Link href="/auth/register" className="font-semibold text-blue-500">Daftar</Link>
+          Belum punya akun?{" "}
+          <Link href="/auth/register" className="font-semibold text-blue-500">
+            Daftar
+          </Link>
         </p>
       </Card>
     </main>
