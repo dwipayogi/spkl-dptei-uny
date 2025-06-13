@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 import {
   FiHome,
   FiSettings,
-  FiBarChart2,
   FiUsers,
   FiLogOut,
   FiChevronLeft,
@@ -66,6 +65,15 @@ export default function Sidebar({ onCollapseChange }: SidebarProps) {
         // Notify parent component if callback exists
         if (onCollapseChange) {
           onCollapseChange(true);
+        }
+      }
+      // Expand on larger screens
+      else {
+        setCollapsed(false);
+
+        // Notify parent component if callback exists
+        if (onCollapseChange) {
+          onCollapseChange(false);
         }
       }
     };

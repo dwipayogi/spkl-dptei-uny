@@ -13,7 +13,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <h3 className="text-5xl font-bold text-blue-600">12</h3>
-            <p className="text-lg text-gray-800">Total Lab</p>
+            <p className="text-lg text-gray-800">Total Lab </p>
           </div>
         </Card>
 
@@ -22,8 +22,8 @@ export default function DashboardPage() {
             <FiList className="w-12 h-12" />
           </div>
           <div>
-            <h3 className="text-5xl font-bold text-blue-600">12</h3>
-            <p className="text-lg text-gray-800">Total Lab</p>
+            <h3 className="text-5xl font-bold text-blue-600">90%</h3>
+            <p className="text-lg text-gray-800">Total Kepatuhan</p>
           </div>
         </Card>
 

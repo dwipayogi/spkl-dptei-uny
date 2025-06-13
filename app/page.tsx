@@ -5,7 +5,7 @@ import Button from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
+    <div className="max-w-7xl mx-auto">
       <nav className="flex items-center justify-between sticky top-0 z-10 p-4">
         <div className="flex items-center space-x-4">
           <Image
@@ -45,7 +45,7 @@ export default function Home() {
         </ul>
       </nav>
 
-      <main className="flex items-center justify-between h-screen">
+      <main className="flex items-center justify-between h-[90vh]">
         <div>
           <h1 className="text-4xl font-bold mb-4">
             Selamat Datang di Sistem Pengukuran Kelayakan Laboratorium

@@ -1,8 +1,44 @@
+"use client";
+
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
+import Dialog from "@/components/ui/dialog";
+import Input from "@/components/ui/input";
+import Select from "@/components/ui/select";
 import { FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
+import { useState } from "react";
 
 export default function LaboratoriumPage() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    personInCharge: "",
+    compliance: "",
+    status: "",
+  });
+
+  // Handle form input changes
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form submitted:", formData);
+    // Here you would typically call an API to save the data
+    setIsDialogOpen(false);
+    // Reset form
+    setFormData({
+      name: "",
+      personInCharge: "",
+      compliance: "",
+      status: "",
+    });
+  };
   const laboratories = [
     {
       id: 1,
@@ -46,14 +82,20 @@ export default function LaboratoriumPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
+        {" "}
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Laboratorium</h1>
           <p className="text-gray-600 mt-2">
             Kelola dan monitor status laboratorium
           </p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">+ Tambah Lab</Button>
-      </div>{" "}
+        <Button
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={() => setIsDialogOpen(true)}
+        >
+          + Tambah Lab
+        </Button>
+      </div>
       {/* Laboratory List */}
       <Card>
         <div className="overflow-x-auto">
@@ -131,8 +173,76 @@ export default function LaboratoriumPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </div>{" "}
       </Card>
+
+      {/* Add Laboratory Dialog */}
+      <Dialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        title="Tambah Laboratorium Baru"
+      >
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <Input
+              label="Nama Laboratorium"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Masukkan nama laboratorium"
+              required
+            />
+
+            <Input
+              label="Penanggung Jawab"
+              name="personInCharge"
+              value={formData.personInCharge}
+              onChange={handleChange}
+              placeholder="Nama penanggung jawab"
+              required
+            />
+
+            <Select
+              label="Tingkat Kepatuhan"
+              name="compliance"
+              value={formData.compliance}
+              onChange={handleChange}
+              options={[
+                { value: "90", label: "Tinggi (90%)" },
+                { value: "75", label: "Sedang (75%)" },
+                { value: "50", label: "Rendah (50%)" },
+              ]}
+              required
+            />
+
+            <Select
+              label="Status"
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              options={[
+                { value: "Tersertifikasi", label: "Tersertifikasi" },
+                { value: "Dalam Proses", label: "Dalam Proses" },
+                { value: "Perlu Evaluasi", label: "Perlu Evaluasi" },
+              ]}
+              required
+            />
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                type="button"
+                className="bg-gray-200 text-gray-800 hover:bg-gray-300"
+                onClick={() => setIsDialogOpen(false)}
+              >
+                Batal
+              </Button>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                Simpan
+              </Button>
+            </div>
+          </div>
+        </form>
+      </Dialog>
     </div>
   );
 }

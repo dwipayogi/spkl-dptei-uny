@@ -31,7 +31,7 @@ export default function DashboardLayout({
     return () => window.removeEventListener("resize", checkWidth);
   }, []);
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen">
       <Sidebar onCollapseChange={setIsSidebarCollapsed} />
       <main
         className={`flex-1 flex flex-col transition-all duration-300 ${
