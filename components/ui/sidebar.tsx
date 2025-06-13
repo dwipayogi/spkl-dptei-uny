@@ -34,14 +34,9 @@ const sidebarItems: SidebarItem[] = [
     icon: FiTool,
   },
   {
-    href: "/dashboard/instrumen",
-    label: "Instrumen",
+    href: "/dashboard/asesmen",
+    label: "Asesmen",
     icon: FiSettings,
-  },
-  {
-    href: "/dashboard/statistik",
-    label: "Statistik",
-    icon: FiBarChart2,
   },
   {
     href: "/dashboard/pengguna",
