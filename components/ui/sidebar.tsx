@@ -12,6 +12,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiTool,
+  FiFileText,
 } from "react-icons/fi";
 import { IconType } from "react-icons";
 
@@ -38,8 +39,13 @@ const sidebarItems: SidebarItem[] = [
     icon: FiSettings,
   },
   {
-    href: "/dashboard/pengguna",
-    label: "Pengguna",
+    href: "/dashboard/dokumen",
+    label: "Dokumen",
+    icon: FiFileText,
+  },
+  {
+    href: "/dashboard/pengelola",
+    label: "Pengelola",
     icon: FiUsers,
   },
 ];
@@ -172,22 +178,6 @@ export default function Sidebar({ onCollapseChange }: SidebarProps) {
           })}
         </ul>
       </nav>
-
-      {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-        <Link
-          href="/"
-          className={`flex ${
-            collapsed
-              ? "flex-col items-center justify-center py-2"
-              : "items-center space-x-3 px-4 py-3"
-          } text-gray-700 hover:bg-gray-100 rounded-lg transition-colors`}
-        >
-          <FiLogOut className={`${collapsed ? "h-5 w-5 mb-1" : "h-5 w-5"}`} />
-          {!collapsed && <span>Keluar</span>}
-          {collapsed && <span className="text-[10px]">Exit</span>}
-        </Link>
-      </div>
     </div>
   );
 }
