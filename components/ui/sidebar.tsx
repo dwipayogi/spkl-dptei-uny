@@ -8,7 +8,6 @@ import {
   FiHome,
   FiSettings,
   FiUsers,
-  FiLogOut,
   FiChevronLeft,
   FiChevronRight,
   FiTool,
@@ -28,11 +27,11 @@ const sidebarItems: SidebarItem[] = [
     label: "Dashboard",
     icon: FiHome,
   },
-  {
-    href: "/dashboard/laboratorium",
-    label: "Laboratorium",
-    icon: FiTool,
-  },
+  // {
+  //   href: "/dashboard/laboratorium",
+  //   label: "Laboratorium",
+  //   icon: FiTool,
+  // },
   {
     href: "/dashboard/asesmen",
     label: "Asesmen",
@@ -43,11 +42,11 @@ const sidebarItems: SidebarItem[] = [
     label: "Dokumen",
     icon: FiFileText,
   },
-  {
-    href: "/dashboard/pengelola",
-    label: "Pengelola",
-    icon: FiUsers,
-  },
+  // {
+  //   href: "/dashboard/pengelola",
+  //   label: "Pengelola",
+  //   icon: FiUsers,
+  // },
 ];
 
 interface SidebarProps {
@@ -105,7 +104,7 @@ export default function Sidebar({ onCollapseChange }: SidebarProps) {
 
   return (
     <div
-      className={`bg-white shadow-lg h-screen fixed left-0 top-0 z-30 transition-all duration-300 ${
+      className={`bg-white shadow-lg h-full fixed left-0 top-0 z-30 transition-all duration-300 ${
         collapsed ? "w-16" : "w-64"
       }`}
     >
