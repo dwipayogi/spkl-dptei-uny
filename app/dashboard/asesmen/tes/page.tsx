@@ -113,7 +113,7 @@ export default function ISOAssessmentTable() {
 
   const handleChange = (index: number, field: string, value: string) => {
     const updated = [...responses];
-    updated[index][field] = value;
+    updated[index][field as keyof typeof updated[0]] = value;
     setResponses(updated);
   };
 
