@@ -6,11 +6,10 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import {
   FiHome,
-  FiSettings,
-  FiUsers,
+  FiList,
+  FiTool,
   FiChevronLeft,
   FiChevronRight,
-  FiTool,
   FiFileText,
 } from "react-icons/fi";
 import { IconType } from "react-icons";
@@ -27,15 +26,15 @@ const sidebarItems: SidebarItem[] = [
     label: "Dashboard",
     icon: FiHome,
   },
-  // {
-  //   href: "/dashboard/laboratorium",
-  //   label: "Laboratorium",
-  //   icon: FiTool,
-  // },
+  {
+    href: "/dashboard/laboratorium",
+    label: "Laboratorium",
+    icon: FiTool,
+  },
   {
     href: "/dashboard/asesmen",
     label: "Asesmen",
-    icon: FiSettings,
+    icon: FiList,
   },
   {
     href: "/dashboard/dokumen",
