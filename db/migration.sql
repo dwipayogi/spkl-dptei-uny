@@ -46,6 +46,21 @@ CREATE TABLE "AssessmentAnswer" (
   FOREIGN KEY ("period_id") REFERENCES "AssessmentPeriod" ("id") ON DELETE CASCADE
 );
 
+-- Create Document table
+CREATE TABLE "Document" (
+  "id" SERIAL PRIMARY KEY,
+  "title" VARCHAR NOT NULL,
+  "description" VARCHAR,
+  "category" VARCHAR NOT NULL,
+  "url" VARCHAR NOT NULL,
+  "filename" VARCHAR NOT NULL,
+  "fileType" VARCHAR NOT NULL,
+  "fileSize" INTEGER NOT NULL,
+  "uploadedBy" VARCHAR NOT NULL DEFAULT 'Admin',
+  "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "updatedAt" TIMESTAMP NOT NULL
+);
+
 -- Create indexes
 CREATE INDEX "laboratory_name_idx" ON "Laboratory" ("name");
 CREATE INDEX "assessment_code_idx" ON "Assessment" ("code");
@@ -53,3 +68,5 @@ CREATE INDEX "assessment_answer_lab_id_idx" ON "AssessmentAnswer" ("lab_id");
 CREATE INDEX "assessment_answer_ass_id_idx" ON "AssessmentAnswer" ("ass_id");
 CREATE INDEX "assessment_answer_period_id_idx" ON "AssessmentAnswer" ("period_id");
 CREATE INDEX "assessment_period_date_range_idx" ON "AssessmentPeriod" ("startDate", "endDate");
+CREATE INDEX "document_title_idx" ON "Document" ("title");
+CREATE INDEX "document_category_idx" ON "Document" ("category");

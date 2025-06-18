@@ -1,15 +1,3 @@
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -19,58 +7,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { FiEye } from "react-icons/fi";
+import Link from "next/link";
+import DocumentUploadForm from "./components/DocumentUploadForm";
+import DocumentDeleteDialog from "./components/DocumentDeleteDialog";
+import { getDocuments } from "./actions";
 
-export default function DokumenPage() {
-  // Contoh data dokumen yang telah diunggah
-  const documents = [
-    {
-      id: 1,
-      title: "Panduan Standar ISO/IEC 17025:2017",
-      description:
-        "Dokumen panduan untuk sertifikasi laboratorium ISO/IEC 17025:2017",
-      category: "Panduan",
-      categoryColor: "bg-blue-100 text-blue-800",
-      uploadedBy: "Admin SPKL",
-      uploadedDate: "10 Mei 2025",
-      fileType: "PDF",
-      fileSize: "2.3 MB",
-    },
-    {
-      id: 2,
-      title: "Template Laporan Asesmen",
-      description: "Template standar untuk laporan asesmen laboratorium",
-      category: "Template",
-      categoryColor: "bg-green-100 text-green-800",
-      uploadedBy: "Admin SPKL",
-      uploadedDate: "15 Apr 2025",
-      fileType: "DOCX",
-      fileSize: "1.1 MB",
-    },
-    {
-      id: 3,
-      title: "Checklist Evaluasi Laboratorium",
-      description: "Daftar periksa untuk evaluasi kepatuhan laboratorium",
-      category: "Checklist",
-      categoryColor: "bg-yellow-100 text-yellow-800",
-      uploadedBy: "Admin SPKL",
-      uploadedDate: "20 Mar 2025",
-      fileType: "XLSX",
-      fileSize: "0.8 MB",
-    },
-    {
-      id: 4,
-      title: "SOP Kalibrasi Peralatan",
-      description:
-        "Standar Operasional Prosedur untuk kalibrasi peralatan laboratorium",
-      category: "SOP",
-      categoryColor: "bg-purple-100 text-purple-800",
-      uploadedBy: "Admin SPKL",
-      uploadedDate: "05 Jun 2025",
-      fileType: "PDF",
-      fileSize: "1.5 MB",
-    },
-  ];
+export default async function DokumenPage() {
+  // Get documents from database
+  const documents = await getDocuments();
+  // Handle no data case
+  const hasData = documents.length > 0;
 
   return (
     <div className="space-y-6">
@@ -83,51 +31,8 @@ export default function DokumenPage() {
           <p className="text-sm text-gray-600 mt-2">
             Unggah dokumen pendukung asesmen laboratorium
           </p>
-        </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              Tambah Dokumen
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Tambah Dokumen</DialogTitle>
-              <DialogDescription>
-                Unggah dokumen pendukung asesmen laboratorium
-              </DialogDescription>
-            </DialogHeader>
-            <Label htmlFor="document-title">
-              Judul Dokumen
-            </Label>
-            <Input type="text" placeholder="Judul Dokumen" />
-
-            <Label htmlFor="document-description">
-              Deskripsi Dokumen
-            </Label>
-            <Input
-              type="text"
-              placeholder="Deskripsi Dokumen"
-            />
-
-            <Label htmlFor="document-category">Kategori Dokumen</Label>
-            <Input
-              type="text"
-              placeholder="Kategori Dokumen (e.g. Panduan, Template, Checklist)"
-            />
-
-            <Label htmlFor="document-file">Unggah File</Label>
-            <p className="text-xs text-gray-500">
-              Pilih file PDF, DOC, XLSX atau DOCX untuk diunggah
-            </p>
-            <Input type="file" accept=".pdf,.doc,.docx,.xlsx" />
-            <DialogFooter>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                Unggah
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        </div>{" "}
+        <DocumentUploadForm />
       </div>
 
       {/* Dokumen List */}
@@ -148,28 +53,42 @@ export default function DokumenPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {documents.map((doc, index) => (
-            <TableRow key={doc.id}>
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{doc.title}</TableCell>
-              <TableCell>
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${doc.categoryColor}`}
-                >
-                  {doc.category}
-                </span>
-              </TableCell>
-              <TableCell>{doc.fileType}</TableCell>
-              <TableCell>{doc.fileSize}</TableCell>
-              <TableCell>{doc.uploadedBy}</TableCell>
-              <TableCell>{doc.uploadedDate}</TableCell>
-              <TableCell className="flex space-x-2">
-                <Button>
-                  <FiEye />
-                </Button>
+          {!hasData ? (
+            <TableRow>
+              <TableCell colSpan={8} className="text-center py-6">
+                Tidak ada dokumen yang tersedia.
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            documents.map((doc, index) => (
+              <TableRow key={doc.id}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{doc.title}</TableCell>
+                <TableCell>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${doc.categoryColor}`}
+                  >
+                    {doc.category}
+                  </span>
+                </TableCell>
+                <TableCell>{doc.fileType}</TableCell>
+                <TableCell>{doc.formattedSize}</TableCell>
+                <TableCell>{doc.uploadedBy}</TableCell>
+                <TableCell>{doc.formattedDate}</TableCell>
+                <TableCell className="flex space-x-2">
+                  <Link href={`/dashboard/dokumen/view/${doc.id}`}>
+                    <Button variant="outline" size="icon">
+                      <FiEye className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <DocumentDeleteDialog
+                    documentId={doc.id}
+                    documentTitle={doc.title}
+                  />
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>

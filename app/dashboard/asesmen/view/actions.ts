@@ -11,6 +11,7 @@ export interface AssessmentResult {
   endDate: string;
   percentage: number;
   lastInspection: string;
+  has_document: boolean;
 }
 
 export interface AssessmentDetailResult {
@@ -71,6 +72,16 @@ export async function getLabAssessmentResults(
             AND answer->>'value' != 'notes'
         `;
 
+        // Check if there's a document for this assessment
+        const documentCheck = await sql`
+          SELECT file_url 
+          FROM "AssessmentAnswer" 
+          WHERE lab_id = ${labId}
+            AND period_id = ${period.period_id}
+            AND file_url IS NOT NULL
+          LIMIT 1
+        `;
+
         // Get total questions for calculation
         const questions = await sql`SELECT COUNT(*) as count FROM "Assessment"`;
         const totalQuestions = parseInt(questions[0].count);
@@ -87,7 +98,11 @@ export async function getLabAssessmentResults(
         }
 
         // Calculate percentage
-        const percentage = Math.round((points / totalQuestions) * 100);
+        const percentage = Math.round((points / totalQuestions) * 100); // Check if document exists
+        const hasDocument =
+          documentCheck &&
+          documentCheck.length > 0 &&
+          documentCheck[0].file_url;
 
         return {
           lab_id: labInfo[0].lab_id,
@@ -98,6 +113,7 @@ export async function getLabAssessmentResults(
           endDate: period.endDate,
           percentage: percentage,
           lastInspection: labInfo[0].lastInspection,
+          has_document: !!hasDocument,
         };
       })
     );

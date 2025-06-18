@@ -63,7 +63,7 @@ export default async function AssessmentPeriodItem({
                       Lihat semua asesmen
                     </Link>
                   </div>
-                </TableCell>{" "}
+                </TableCell>
                 <TableCell className="text-center">
                   {lab.percentage !== null ? `${lab.percentage}%` : "-"}
                 </TableCell>

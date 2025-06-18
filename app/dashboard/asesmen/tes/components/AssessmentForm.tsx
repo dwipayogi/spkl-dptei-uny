@@ -141,13 +141,45 @@ export default function AssessmentForm({
 
     setIsDirty(false);
   };
-
   // Handle file upload
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [uploadedFileName, setUploadedFileName] = useState("");
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      // In a real app, you would upload the file to a storage service
-      // and get back a URL. For now, we'll just store the filename
-      setFileUrl(e.target.files[0].name);
+      const file = e.target.files[0];
+      setUploadedFileName(file.name);
+      setIsUploading(true);
+      setUploadError("");
+
+      try {
+        // Create FormData object to send file
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // Upload to our API route that uses Vercel Blob
+        const response = await fetch("/api/assessment-files", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Failed to upload file");
+        }
+
+        // Store the URL we got back
+        setFileUrl(result.url);
+        setIsDirty(true);
+      } catch (error: any) {
+        console.error("Error uploading file:", error);
+        setUploadError(error.message || "Failed to upload file");
+        setFileUrl("");
+      } finally {
+        setIsUploading(false);
+      }
       setIsDirty(true);
     }
   };
@@ -275,26 +307,53 @@ export default function AssessmentForm({
             setNotes(e.target.value);
             setIsDirty(true);
           }}
-        />
+        />{" "}
         <div className="mt-4">
           <h4 className="text-md font-semibold">Dokumen Pendukung</h4>
-          <div className="flex items-center gap-2 mt-2">
-            <input
-              type="file"
-              id="file-upload"
-              onChange={handleFileChange}
-              className="hidden"
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            />
-            <label
-              htmlFor="file-upload"
-              className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50"
-            >
-              <Upload className="w-4 h-4" />
-              <span className="text-sm">Upload File</span>
-            </label>
-            {fileUrl && (
-              <span className="text-sm text-gray-600">File: {fileUrl}</span>
+          <div className="flex flex-col gap-2 mt-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                id="file-upload"
+                onChange={handleFileChange}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                disabled={isUploading}
+              />
+              <label
+                htmlFor="file-upload"
+                className={`flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 ${
+                  isUploading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                <Upload className="w-4 h-4" />
+                <span className="text-sm">
+                  {isUploading ? "Mengunggah..." : "Upload File"}
+                </span>
+              </label>
+
+              {uploadedFileName && !isUploading && (
+                <span className="text-sm text-gray-600">
+                  {uploadedFileName}
+                </span>
+              )}
+            </div>
+
+            {uploadError && (
+              <p className="text-sm text-red-500">{uploadError}</p>
+            )}
+
+            {fileUrl && !isUploading && (
+              <div className="flex items-center gap-2 mt-2">
+                <a
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-blue-600 underline flex items-center gap-1"
+                >
+                  <span>Lihat Dokumen</span>
+                </a>
+              </div>
             )}
           </div>
         </div>

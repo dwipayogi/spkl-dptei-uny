@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { FiArrowLeft, FiEye } from "react-icons/fi";
+import ViewDocumentButton from "./components/ViewDocumentButton";
 
 export default async function LabAssessmentViewPage({
   searchParams,
@@ -110,8 +111,13 @@ export default async function LabAssessmentViewPage({
                           : "-"}
                       </p>
                     </div>
-                  </div>
-                  <div className="flex justify-end">
+                  </div>{" "}
+                  <div className="flex justify-end gap-2">
+                    <ViewDocumentButton
+                      labId={result.lab_id}
+                      periodId={result.period_id}
+                      hasDocument={!!result.has_document}
+                    />
                     <Link
                       href={`/dashboard/asesmen/view/detail?labId=${result.lab_id}&periodId=${result.period_id}`}
                     >
