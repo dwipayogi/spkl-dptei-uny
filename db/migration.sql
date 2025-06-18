@@ -14,7 +14,7 @@ CREATE TABLE "Laboratory" (
 -- Create Assessment table
 CREATE TABLE "Assessment" (
   "id" SERIAL PRIMARY KEY,
-  "code" INTEGER NOT NULL UNIQUE,
+  "code" VARCHAR NOT NULL UNIQUE,
   "question" VARCHAR NOT NULL,
   "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
   "updatedAt" TIMESTAMP NOT NULL

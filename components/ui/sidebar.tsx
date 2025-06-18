@@ -41,11 +41,6 @@ const sidebarItems: SidebarItem[] = [
     label: "Dokumen",
     icon: FiFileText,
   },
-  // {
-  //   href: "/dashboard/pengelola",
-  //   label: "Pengelola",
-  //   icon: FiUsers,
-  // },
 ];
 
 interface SidebarProps {

@@ -32,10 +32,20 @@ function isValidDate(date: Date | undefined) {
   return !isNaN(date.getTime());
 }
 
-export function DatePicker({ title }: { title: string }) {
+interface DatePickerProps {
+  title: string;
+  date?: Date;
+  onSelect?: (date: Date | undefined) => void;
+}
+
+export function DatePicker({
+  title,
+  date: externalDate,
+  onSelect,
+}: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(
-    new Date()
+    externalDate || new Date()
   );
   const [month, setMonth] = React.useState<Date | undefined>(date);
   const [value, setValue] = React.useState(formatDate(date));
@@ -52,11 +62,14 @@ export function DatePicker({ title }: { title: string }) {
           placeholder="June 01, 2025"
           className="bg-background pr-10"
           onChange={(e) => {
-            const date = new Date(e.target.value);
+            const newDate = new Date(e.target.value);
             setValue(e.target.value);
-            if (isValidDate(date)) {
-              setDate(date);
-              setMonth(date);
+            if (isValidDate(newDate)) {
+              setDate(newDate);
+              setMonth(newDate);
+              if (onSelect) {
+                onSelect(newDate);
+              }
             }
           }}
           onKeyDown={(e) => {
@@ -89,9 +102,12 @@ export function DatePicker({ title }: { title: string }) {
               captionLayout="dropdown"
               month={month}
               onMonthChange={setMonth}
-              onSelect={(date) => {
-                setDate(date);
-                setValue(formatDate(date));
+              onSelect={(selectedDate) => {
+                setDate(selectedDate);
+                setValue(formatDate(selectedDate));
+                if (onSelect) {
+                  onSelect(selectedDate);
+                }
                 setOpen(false);
               }}
             />

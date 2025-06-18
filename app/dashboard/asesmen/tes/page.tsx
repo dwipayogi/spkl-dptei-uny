@@ -1,225 +1,197 @@
-"use client";
-
-import React, { useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
+  getAssessmentQuestions,
+  getLaboratory,
+  getAssessmentPeriod,
+  initializeAssessmentQuestions,
+  getAssessmentAnswersByLabAndPeriod,
+} from "./actions";
+import AssessmentForm from "./components/AssessmentForm";
 
-const initialData = [
-  // Format: [kode, pertanyaan]
-  [
-    "4.1",
-    "Apakah laboratorium bebas dari tekanan komersial, finansial, atau lainnya yang dapat mempengaruhi hasil?",
-  ],
-  [
-    "4.2",
-    "Apakah ada kebijakan yang menjamin ketidakberpihakan dalam kegiatan laboratorium?",
-  ],
-  [
-    "4.3",
-    "Apakah personel memahami dan menandatangani pernyataan kerahasiaan?",
-  ],
-  [
-    "4.4",
-    "Apakah laboratorium mengelola informasi pelanggan secara aman dan rahasia?",
-  ],
-  [
-    "5.1",
-    "Apakah struktur organisasi laboratorium terdokumentasi dengan jelas?",
-  ],
-  [
-    "5.2",
-    "Apakah peran dan tanggung jawab setiap personel dijelaskan dalam uraian jabatan?",
-  ],
-  [
-    "5.3",
-    "Apakah ada personel yang memiliki kewenangan teknis untuk pengambilan keputusan terkait hasil uji/kalibrasi?",
-  ],
-  ["5.4", "Apakah terdapat prosedur pengelolaan konflik kepentingan?"],
-  [
-    "6.1",
-    "Apakah laboratorium memiliki personel yang kompeten untuk melakukan pengujian/kalibrasi?",
-  ],
-  ["6.2", "Apakah kompetensi personel dievaluasi dan dicatat secara berkala?"],
-  [
-    "6.3",
-    "Apakah fasilitas laboratorium mendukung pelaksanaan pengujian yang andal?",
-  ],
-  ["6.4", "Apakah peralatan diuji secara rutin dan dikalibrasi sesuai jadwal?"],
-  ["6.5", "Apakah terdapat catatan kalibrasi dan pemeliharaan alat?"],
-  ["7.1", "Apakah metode uji/kalibrasi terdokumentasi dan divalidasi?"],
-  ["7.2", "Apakah laboratorium melakukan verifikasi metode sebelum digunakan?"],
-  [
-    "7.3",
-    "Apakah data hasil uji dapat ditelusuri ke standar nasional atau internasional?",
-  ],
-  [
-    "7.4",
-    "Apakah ketidakpastian pengukuran dihitung dan dilaporkan bila relevan?",
-  ],
-  ["7.5", "Apakah pengendalian mutu internal dilakukan?"],
-  [
-    "7.6",
-    "Apakah hasil uji dilaporkan dengan jelas dan mencakup semua informasi penting?",
-  ],
-  [
-    "7.7",
-    "Apakah prosedur untuk penanganan hasil tidak valid atau keluhan pelanggan tersedia?",
-  ],
-  [
-    "8.1",
-    "Apakah laboratorium memiliki kebijakan mutu dan tujuan mutu yang terdokumentasi?",
-  ],
-  ["8.2", "Apakah dilakukan audit internal secara berkala?"],
-  ["8.3", "Apakah dilakukan tinjauan manajemen secara rutin?"],
-  [
-    "8.4",
-    "Apakah ketidaksesuaian didokumentasikan dan dilakukan tindakan korektif?",
-  ],
-  ["8.5", "Apakah risiko dan peluang telah diidentifikasi dan dikelola?"],
+// Initial data to populate the database if empty
+const initialQuestions = [
+  // Format: {code, question}
+  {
+    code: "4.1",
+    question:
+      "Apakah laboratorium bebas dari tekanan komersial, finansial, atau lainnya yang dapat mempengaruhi hasil?",
+  },
+  {
+    code: "4.2",
+    question:
+      "Apakah ada kebijakan yang menjamin ketidakberpihakan dalam kegiatan laboratorium?",
+  },
+  {
+    code: "4.3",
+    question:
+      "Apakah personel memahami dan menandatangani pernyataan kerahasiaan?",
+  },
+  {
+    code: "4.4",
+    question:
+      "Apakah laboratorium mengelola informasi pelanggan secara aman dan rahasia?",
+  },
+  {
+    code: "5.1",
+    question:
+      "Apakah struktur organisasi laboratorium terdokumentasi dengan jelas?",
+  },
+  {
+    code: "5.2",
+    question:
+      "Apakah peran dan tanggung jawab setiap personel dijelaskan dalam uraian jabatan?",
+  },
+  {
+    code: "5.3",
+    question:
+      "Apakah ada personel yang memiliki kewenangan teknis untuk pengambilan keputusan terkait hasil uji/kalibrasi?",
+  },
+  {
+    code: "5.4",
+    question: "Apakah terdapat prosedur pengelolaan konflik kepentingan?",
+  },
+  {
+    code: "6.1",
+    question:
+      "Apakah laboratorium memiliki personel yang kompeten untuk melakukan pengujian/kalibrasi?",
+  },
+  {
+    code: "6.2",
+    question:
+      "Apakah kompetensi personel dievaluasi dan dicatat secara berkala?",
+  },
+  {
+    code: "6.3",
+    question:
+      "Apakah fasilitas laboratorium mendukung pelaksanaan pengujian yang andal?",
+  },
+  {
+    code: "6.4",
+    question:
+      "Apakah peralatan diuji secara rutin dan dikalibrasi sesuai jadwal?",
+  },
+  {
+    code: "6.5",
+    question: "Apakah terdapat catatan kalibrasi dan pemeliharaan alat?",
+  },
+  {
+    code: "7.1",
+    question: "Apakah metode uji/kalibrasi terdokumentasi dan divalidasi?",
+  },
+  {
+    code: "7.2",
+    question:
+      "Apakah laboratorium melakukan verifikasi metode sebelum digunakan?",
+  },
+  {
+    code: "7.3",
+    question:
+      "Apakah data hasil uji dapat ditelusuri ke standar nasional atau internasional?",
+  },
+  {
+    code: "7.4",
+    question:
+      "Apakah ketidakpastian pengukuran dihitung dan dilaporkan bila relevan?",
+  },
+  { code: "7.5", question: "Apakah pengendalian mutu internal dilakukan?" },
+  {
+    code: "7.6",
+    question:
+      "Apakah hasil uji dilaporkan dengan jelas dan mencakup semua informasi penting?",
+  },
+  {
+    code: "7.7",
+    question:
+      "Apakah prosedur untuk penanganan hasil tidak valid atau keluhan pelanggan tersedia?",
+  },
+  {
+    code: "8.1",
+    question:
+      "Apakah laboratorium memiliki kebijakan mutu dan tujuan mutu yang terdokumentasi?",
+  },
+  { code: "8.2", question: "Apakah dilakukan audit internal secara berkala?" },
+  {
+    code: "8.3",
+    question: "Apakah dilakukan tinjauan manajemen secara rutin?",
+  },
+  {
+    code: "8.4",
+    question:
+      "Apakah ketidaksesuaian didokumentasikan dan dilakukan tindakan korektif?",
+  },
+  {
+    code: "8.5",
+    question: "Apakah risiko dan peluang telah diidentifikasi dan dikelola?",
+  },
 ];
 
-export default function ISOAssessmentTable() {
-  const [responses, setResponses] = useState(
-    initialData.map(([kode, pertanyaan]) => ({
-      kode,
-      pertanyaan,
-      jawaban: "",
-      catatan: "",
-      file: "",
-    }))
+export default async function AsesmenTestPage({
+  searchParams,
+}: {
+  searchParams: { labId?: string; periodId?: string };
+}) {
+  // Check if labId and periodId are provided
+  const labId = searchParams.labId ? parseInt(searchParams.labId) : null;
+  const periodId = searchParams.periodId
+    ? parseInt(searchParams.periodId)
+    : null;
+
+  // Initialize assessment questions if they don't exist yet
+  await initializeAssessmentQuestions(initialQuestions);
+
+  // Fetch assessment questions from database
+  const questions = await getAssessmentQuestions();
+
+  // Get lab and period information
+  const laboratory = labId ? await getLaboratory(labId) : null;
+  const period = periodId ? await getAssessmentPeriod(periodId) : null;
+  // Get existing answers if any
+  let existingAnswers = await getAssessmentAnswersByLabAndPeriod(
+    labId || 0,
+    periodId || 0
   );
 
-  const handleChange = (index: number, field: string, value: string) => {
-    const updated = [...responses];
-    updated[index][field as keyof typeof updated[0]] = value;
-    setResponses(updated);
-  };
-
-  return (
-    <>
-      <h2 className="text-xl font-semibold mb-4">
-        Asesmen Mandiri ISO/IEC 17025:2017
-      </h2>
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-16">Kode</TableHead>
-              <TableHead>Pertanyaan</TableHead>
-              <TableHead className="w-32">Jawaban</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {responses.map((row, index) => (
-              <TableRow key={index}>
-                <TableCell className="font-medium">{row.kode}</TableCell>
-                <TableCell>{row.pertanyaan}</TableCell>
-                <TableCell>
-                  <RadioGroup
-                    defaultValue={row.jawaban}
-                    onValueChange={(value) =>
-                      handleChange(index, "jawaban", value)
-                    }
-                    className="space-y-1"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Ya" id={`ya-${index}`} />
-                      <Label htmlFor={`ya-${index}`}>Ya</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value="Sebagian"
-                        id={`sebagian-${index}`}
-                      />
-                      <Label htmlFor={`sebagian-${index}`}>Sebagian</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Tidak" id={`tidak-${index}`} />
-                      <Label htmlFor={`tidak-${index}`}>Tidak</Label>
-                    </div>
-                  </RadioGroup>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold">Catatan Asesmen</h3>
-        <Textarea
-          placeholder="Tambahkan catatan untuk asesmen ini..."
-          className="min-h-[80px]"
-        />
-        <div className="mt-4">
-          <h4 className="text-md font-semibold">Dokumen Pendukung</h4>
-          <div className="flex items-center gap-2">
-            <input
-              type="file"
-              id="file-upload"
-              onChange={(e) =>
-                handleChange(0, "file", e.target.files?.[0]?.name || "")
-              }
-              className="hidden"
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            />
-            <label
-              htmlFor="file-upload"
-              className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50"
-            >
-              <Upload className="w-4 h-4" />
-              <span className="text-sm">Upload File</span>
-            </label>
-          </div>
+  // If missing required parameters, show error
+  if (!labId || !periodId || !laboratory || !period) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold mb-4">
+          Asesmen Mandiri ISO/IEC 17025:2017
+        </h2>
+        <div className="p-6 bg-red-50 text-red-700 border border-red-200 rounded-lg">
+          <h3 className="font-semibold mb-2">Parameter Tidak Lengkap</h3>
+          <p>
+            Diperlukan ID Laboratorium dan ID Periode yang valid untuk melakukan
+            asesmen.
+          </p>
+          <p>
+            Silakan kembali ke halaman asesmen dan pilih laboratorium yang
+            sesuai.
+          </p>
         </div>
       </div>
+    );
+  }
 
-      <div className="mt-6 flex justify-end gap-4">
-        <Button variant="outline">Reset</Button>
-
-        <AlertDialog>
-          <AlertDialogTrigger className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm font-semibold">
-            Submit
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Apakah anda yakin?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tindakan ini tidak dapat dibatalkan. Ini akan mengirimkan
-                asesmen Anda untuk ditinjau. Pastikan semua informasi sudah benar.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Batalkan</AlertDialogCancel>
-              <AlertDialogAction className="bg-blue-600 hover:bg-blue-700">
-                Lanjutkan
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold">Asesmen {laboratory.name}</h2>
+          <span className="bg-blue-100 text-blue-800 px-2 py-1 text-xs rounded-full">
+            Periode: {period.title}
+          </span>
+        </div>
+        <p className="text-gray-600">
+          Lakukan asesmen berstandar ISO/IEC 17025:2017 untuk laboratorium ini.
+        </p>
       </div>
-    </>
+
+      <AssessmentForm
+        questions={questions}
+        labId={labId}
+        periodId={periodId}
+        existingAnswers={existingAnswers}
+      />
+    </div>
   );
 }
