@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { FiEye, FiUpload } from "react-icons/fi";
+import { DatePicker } from "@/components/datePicker";
 
 export default function InstrumenPage() {
   return (
@@ -54,19 +55,12 @@ export default function InstrumenPage() {
                 Tambahkan periode asesmen baru untuk laboratorium.
               </DialogDescription>
             </DialogHeader>
-            <div>
-              <Label htmlFor="assessment-period" className="mb-2">Periode Asesmen</Label>
-              <Input
-                type="text"
-                id="assessment-period"
-                placeholder="e.g. Juni - Desember 2023"
-                className="mb-4"
+            <div className="space-y-4">
+              <DatePicker
+                title="Tanggal Mulai"
               />
-              <Label htmlFor="assessment-description" className="mb-2">Deskripsi</Label>
-              <Input
-                type="text"
-                id="assessment-description"
-                placeholder="e.g. Deskripsi periode asesmen"
+              <DatePicker
+                title="Tanggal Selesai"
               />
             </div>
             <DialogFooter>

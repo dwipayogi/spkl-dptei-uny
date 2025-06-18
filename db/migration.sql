@@ -6,7 +6,7 @@ CREATE TABLE "Laboratory" (
   "name" VARCHAR NOT NULL,
   "person" VARCHAR NOT NULL,
   "percentage" INTEGER NOT NULL,
-  "lastInspection" TIMESTAMP NOT NULL,
+  "lastInspection" TIMESTAMP,
   "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
   "updatedAt" TIMESTAMP NOT NULL
 );
