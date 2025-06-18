@@ -90,16 +90,16 @@ export default function InstrumenPage() {
                     <TableRow>
                       <TableHead>No</TableHead>
                       <TableHead>Nama Lab</TableHead>
-                      <TableHead>Tingkat Kepatuhan</TableHead>
-                      <TableHead>Aksi</TableHead>
+                      <TableHead className="text-center">Tingkat Kesesuaian</TableHead>
+                      <TableHead className="text-center">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
                       <TableCell>1</TableCell>
                       <TableCell>Lab Artificial Intelligence</TableCell>
-                      <TableCell>90%</TableCell>
-                      <TableCell className="flex space-x-2">
+                      <TableCell className="text-center">90%</TableCell>
+                      <TableCell className="text-center">
                         <Button variant="outline">
                           <FiEye />
                         </Button>
@@ -108,8 +108,8 @@ export default function InstrumenPage() {
                     <TableRow>
                       <TableCell>2</TableCell>
                       <TableCell>Lab Jaringan</TableCell>
-                      <TableCell>85%</TableCell>
-                      <TableCell className="flex space-x-2">
+                      <TableCell className="text-center">85%</TableCell>
+                      <TableCell className="text-center">
                         <Button variant="outline">
                           <FiEye />
                         </Button>
@@ -118,8 +118,8 @@ export default function InstrumenPage() {
                     <TableRow>
                       <TableCell>3</TableCell>
                       <TableCell>Lab Multimedia</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell className="flex space-x-2">
+                      <TableCell className="text-center">-</TableCell>
+                      <TableCell className="text-center">
                         <Link href="/dashboard/asesmen/tes">
                           <Button>
                             <FiUpload />
@@ -142,16 +142,16 @@ export default function InstrumenPage() {
                     <TableRow>
                       <TableHead>No</TableHead>
                       <TableHead>Nama Lab</TableHead>
-                      <TableHead>Tingkat Kepatuhan</TableHead>
-                      <TableHead>Aksi</TableHead>
+                      <TableHead className="text-center">Tingkat Kesesuaian</TableHead>
+                      <TableHead className="text-center">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
                       <TableCell>1</TableCell>
                       <TableCell>Lab Artificial Intelligence</TableCell>
-                      <TableCell>90%</TableCell>
-                      <TableCell className="flex space-x-2">
+                      <TableCell className="text-center">90%</TableCell>
+                      <TableCell className="text-center">
                         <Button variant="outline">
                           <FiEye />
                         </Button>
@@ -160,8 +160,8 @@ export default function InstrumenPage() {
                     <TableRow>
                       <TableCell>2</TableCell>
                       <TableCell>Lab Jaringan</TableCell>
-                      <TableCell>85%</TableCell>
-                      <TableCell className="flex space-x-2">
+                      <TableCell className="text-center">85%</TableCell>
+                      <TableCell className="text-center">
                         <Button variant="outline">
                           <FiEye />
                         </Button>
@@ -170,8 +170,8 @@ export default function InstrumenPage() {
                     <TableRow>
                       <TableCell>3</TableCell>
                       <TableCell>Lab Multimedia</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell className="flex space-x-2">
+                      <TableCell className="text-center">-</TableCell>
+                      <TableCell className="text-center">
                         <Link href="/dashboard/asesmen/tes">
                           <Button>
                             <FiUpload />
