@@ -45,14 +45,40 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { error: "File type not allowed" },
         { status: 400 }
       );
-    }
-
-    // Upload file to Vercel Blob
+    } // Upload file to Vercel Blob
     const blob = await put(file.name, file, {
       access: "public",
     });
 
     const now = new Date().toISOString();
+
+    // Convert file type to more readable format
+    let readableFileType = file.type;
+    if (file.type === "application/pdf") {
+      readableFileType = "PDF";
+    } else if (
+      file.type ===
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      file.type === "application/vnd.ms-excel"
+    ) {
+      readableFileType = "XLSX";
+    } else if (
+      file.type ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+      file.type === "application/msword"
+    ) {
+      readableFileType = "WORD";
+    } else if (
+      file.type ===
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation" ||
+      file.type === "application/vnd.ms-powerpoint"
+    ) {
+      readableFileType = "PPTX";
+    } else if (file.type === "text/plain") {
+      readableFileType = "TEXT";
+    } else if (file.type.startsWith("image/")) {
+      readableFileType = "IMAGE";
+    }
 
     // Save document metadata to database
     const result = await sql`
@@ -74,7 +100,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         ${category},
         ${blob.url},
         ${file.name},
-        ${file.type},
+        ${readableFileType},
         ${file.size},
         ${"System"}, 
         ${now}, 
