@@ -49,6 +49,9 @@ export function getCategoryColor(category: string): string {
     Laporan: "bg-red-100 text-red-800",
     Manual: "bg-indigo-100 text-indigo-800",
     Form: "bg-pink-100 text-pink-800",
+    Sertifikat: "bg-orange-100 text-orange-800",
+    Kebijakan: "bg-teal-100 text-teal-800",
+    Prosedur: "bg-cyan-100 text-cyan-800",
   };
 
   return categories[category] || "bg-gray-100 text-gray-800";

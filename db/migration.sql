@@ -56,7 +56,7 @@ CREATE TABLE "Document" (
   "filename" VARCHAR NOT NULL,
   "fileType" VARCHAR NOT NULL,
   "fileSize" INTEGER NOT NULL,
-  "uploadedBy" VARCHAR NOT NULL DEFAULT 'Admin',
+  "uploadedBy" VARCHAR NOT NULL,
   "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
   "updatedAt" TIMESTAMP NOT NULL
 );

@@ -238,7 +238,9 @@ export default async function AssessmentDetailPage({
             <div>
               <h3 className="text-lg font-semibold mb-2">Dokumen Pendukung</h3>
               <Link
-                href="#"
+                href={assessmentNotes.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
               >
                 <FiDownload />

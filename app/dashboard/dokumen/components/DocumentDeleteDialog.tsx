@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,9 +13,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { FiTrash2 } from "react-icons/fi";
 import { deleteDocument } from "../actions";
+import { useRouter } from "next/navigation";
 
 interface DocumentDeleteDialogProps {
   documentId: number;
@@ -26,33 +27,31 @@ export default function DocumentDeleteDialog({
   documentTitle,
 }: DocumentDeleteDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    setError(null);
-
     try {
       const result = await deleteDocument(documentId);
-
-      if (!result.success) {
-        throw new Error(result.error || "Failed to delete document");
+      if (result.success) {
+        setIsOpen(false);
+        router.refresh();
+      } else {
+        console.error("Failed to delete document:", result.error);
       }
-
-      // No need to reload the page here, as the action will revalidate the path
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error deleting document:", error);
-      setError(error.message || "Failed to delete document");
     } finally {
       setIsDeleting(false);
     }
   };
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="icon">
-          <FiTrash2 className="h-4 w-4" />
+        <Button variant="outline" size="icon" title="Hapus dokumen">
+          <FiTrash2 className="h-4 w-4 text-red-600" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -63,15 +62,12 @@ export default function DocumentDeleteDialog({
             Tindakan ini tidak dapat dibatalkan.
           </AlertDialogDescription>
         </AlertDialogHeader>
-
-        {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
-
         <AlertDialogFooter>
-          <AlertDialogCancel>Batal</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isDeleting}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            className="bg-red-600 hover:bg-red-700"
           >
             {isDeleting ? "Menghapus..." : "Hapus"}
           </AlertDialogAction>

@@ -1,68 +1,145 @@
 "use server";
 
+import { put } from "@vercel/blob";
 import sql from "@/db/db";
-import {
-  DocumentMetadata,
-  ParsedDocument,
-  parseDocument,
-} from "@/lib/blob-config";
-import { del } from "@vercel/blob";
-import { revalidatePath } from "next/cache";
+import { DocumentMetadata, DocumentUploadResponse } from "@/lib/blob-config";
 
-// Function to get all documents
-export async function getDocuments(): Promise<ParsedDocument[]> {
+export interface Document {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  url: string;
+  filename: string;
+  fileType: string;
+  fileSize: number;
+  uploadedBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type DocumentFormData = {
+  title: string;
+  description: string;
+  category: string;
+  file: File;
+};
+
+export async function getDocuments(): Promise<Document[]> {
   try {
-    const documents = await sql`
-      SELECT * FROM "Document" ORDER BY "createdAt" DESC`;
+    const result = await sql`
+      SELECT * FROM "Document" 
+      ORDER BY "createdAt" DESC
+    `;
 
-    return documents.map((doc: any) => parseDocument(doc));
+    return result as Document[];
   } catch (error) {
     console.error("Error fetching documents:", error);
     return [];
   }
 }
 
-// Function to get a document by ID
-export async function getDocument(id: number): Promise<ParsedDocument | null> {
+export async function getDocument(id: number): Promise<Document | null> {
   try {
     const result = await sql`
-      SELECT * FROM "Document" WHERE id = ${id}`;
+      SELECT * FROM "Document" 
+      WHERE "id" = ${id}
+    `;
 
-    if (result.length === 0) {
-      return null;
+    if (result && result.length > 0) {
+      return result[0] as Document;
     }
-
-    return parseDocument(result[0]);
+    return null;
   } catch (error) {
-    console.error("Error fetching document:", error);
+    console.error(`Error fetching document with id ${id}:`, error);
     return null;
   }
 }
 
-// Function to delete a document
+export async function uploadDocument(
+  data: DocumentFormData
+): Promise<DocumentUploadResponse> {
+  try {
+    // Upload file to Vercel Blob
+    const blob = await put(data.file.name, data.file, {
+      access: "public",
+    });
+
+    const now = new Date().toISOString();
+
+    // Save document metadata to database
+    const result = await sql`
+      INSERT INTO "Document" (
+        "title", 
+        "description", 
+        "category", 
+        "url",
+        "filename",
+        "fileType",
+        "fileSize",
+        "uploadedBy",
+        "createdAt", 
+        "updatedAt"
+      )
+      VALUES (
+        ${data.title}, 
+        ${data.description}, 
+        ${data.category},
+        ${blob.url},
+        ${data.file.name},
+        ${data.file.type},
+        ${data.file.size},
+        ${"System"}, 
+        ${now}, 
+        ${now}
+      )
+      RETURNING *
+    `;
+
+    if (result && result.length > 0) {
+      return {
+        success: true,
+        document: {
+          id: result[0].id,
+          title: result[0].title,
+          description: result[0].description,
+          category: result[0].category,
+          url: result[0].url,
+          filename: result[0].filename,
+          fileType: result[0].fileType,
+          fileSize: result[0].fileSize,
+          uploadedBy: result[0].uploadedBy,
+          createdAt: result[0].createdAt,
+          updatedAt: result[0].updatedAt,
+        },
+      };
+    }
+
+    return { success: false, error: "Failed to save document to database" };
+  } catch (error) {
+    console.error("Error uploading document:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
+}
+
 export async function deleteDocument(
   id: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Get document details to delete the blob
-    const document = await sql`
-      SELECT * FROM "Document" WHERE id = ${id}`;
+    await sql`
+      DELETE FROM "Document"
+      WHERE "id" = ${id}
+    `;
 
-    if (document.length === 0) {
-      return { success: false, error: "Document not found" };
-    }
-
-    // Delete from database
-    await sql`DELETE FROM "Document" WHERE id = ${id}`;
-
-    // Delete from Vercel Blob
-    const blobUrl = document[0].url;
-    await del(blobUrl);
-
-    revalidatePath("/dashboard/dokumen");
     return { success: true };
   } catch (error) {
-    console.error("Error deleting document:", error);
-    return { success: false, error: "Failed to delete document" };
+    console.error(`Error deleting document with id ${id}:`, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
   }
 }

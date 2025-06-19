@@ -8,17 +8,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { FiEye } from "react-icons/fi";
+import { FiEye, FiDownload } from "react-icons/fi";
 import Link from "next/link";
-import DocumentUploadForm from "./components/DocumentUploadForm";
-import DocumentDeleteDialog from "./components/DocumentDeleteDialog";
 import { getDocuments } from "./actions";
+import {
+  getCategoryColor,
+  formatFileSize,
+  formatDate,
+} from "@/lib/blob-config";
+import DocumentDeleteDialog from "./components/DocumentDeleteDialog";
 
 export default async function DokumenPage() {
-  // Get documents from database
   const documents = await getDocuments();
-  // Handle no data case
-  const hasData = documents.length > 0;
 
   return (
     <div className="space-y-6">
@@ -29,10 +30,14 @@ export default async function DokumenPage() {
             Dokumen
           </h1>
           <p className="text-sm text-gray-600 mt-2">
-            Unggah dokumen pendukung asesmen laboratorium
+            Kelola dokumen pendukung asesmen laboratorium
           </p>
-        </div>{" "}
-        <DocumentUploadForm />
+        </div>
+        <Link href="/dashboard/dokumen/upload">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+            Unggah Dokumen
+          </Button>
+        </Link>
       </div>
 
       {/* Dokumen List */}
@@ -53,32 +58,54 @@ export default async function DokumenPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {!hasData ? (
+          {documents.length === 0 ? (
             <TableRow>
               <TableCell colSpan={8} className="text-center py-6">
-                Tidak ada dokumen yang tersedia.
+                Belum ada dokumen yang diunggah.
               </TableCell>
             </TableRow>
           ) : (
             documents.map((doc, index) => (
               <TableRow key={doc.id}>
                 <TableCell>{index + 1}</TableCell>
-                <TableCell>{doc.title}</TableCell>
+                <TableCell>
+                  <div>
+                    <div className="font-medium">{doc.title}</div>
+                    {doc.description && (
+                      <div className="text-sm text-gray-500">
+                        {doc.description}
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell>
                   <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${doc.categoryColor}`}
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(
+                      doc.category
+                    )}`}
                   >
                     {doc.category}
                   </span>
                 </TableCell>
-                <TableCell>{doc.fileType}</TableCell>
-                <TableCell>{doc.formattedSize}</TableCell>
+                <TableCell>{doc.fileType.toUpperCase()}</TableCell>
+                <TableCell>{formatFileSize(doc.fileSize)}</TableCell>
                 <TableCell>{doc.uploadedBy}</TableCell>
-                <TableCell>{doc.formattedDate}</TableCell>
+                <TableCell>
+                  {formatDate(new Date(doc.createdAt))}
+                </TableCell>
                 <TableCell className="flex space-x-2">
-                  <Link href={`/dashboard/dokumen/view/${doc.id}`}>
-                    <Button variant="outline" size="icon">
+                  <Link
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="outline" size="icon" title="Lihat dokumen">
                       <FiEye className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Link href={doc.url} download={doc.filename}>
+                    <Button variant="outline" size="icon" title="Unduh dokumen">
+                      <FiDownload className="h-4 w-4" />
                     </Button>
                   </Link>
                   <DocumentDeleteDialog
