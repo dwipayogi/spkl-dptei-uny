@@ -2,7 +2,8 @@
 
 import { put } from "@vercel/blob";
 import sql from "@/db/db";
-import { DocumentMetadata, DocumentUploadResponse } from "@/lib/blob-config";
+import { DocumentUploadResponse } from "@/lib/blob-config";
+import { revalidatePath } from "next/cache";
 
 export interface Document {
   id: number;
@@ -115,6 +116,8 @@ export async function uploadDocument(
       };
     }
 
+    revalidatePath("/dashboard/dokumen");
+    revalidatePath("/dashboard");
     return { success: false, error: "Failed to save document to database" };
   } catch (error) {
     console.error("Error uploading document:", error);

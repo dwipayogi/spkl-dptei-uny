@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/db/db";
+import { revalidatePath } from "next/cache";
 
 export interface AssessmentPeriod {
   id: number;
@@ -129,6 +130,7 @@ export async function createAssessmentPeriod(
     `;
 
     if (result && result.length > 0) {
+      revalidatePath("/dashboard/asesmen");
       return { success: true, id: result[0].id };
     }
 

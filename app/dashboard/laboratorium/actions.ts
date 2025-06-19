@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/db/db";
+import { revalidatePath } from "next/cache";
 
 export interface Laboratory {
   id: number;
@@ -75,6 +76,9 @@ export async function createLaboratory(
     `;
 
     if (result && result.length > 0) {
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/laboratorium");
+      revalidatePath("/dashboard/asesmen");
       return { success: true, id: result[0].id };
     }
 
@@ -106,6 +110,9 @@ export async function updateLaboratory(
       WHERE "id" = ${id}
     `;
 
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/laboratorium");
+    revalidatePath("/dashboard/asesmen");
     return { success: true };
   } catch (error) {
     console.error(`Error updating laboratory with id ${id}:`, error);
@@ -125,6 +132,9 @@ export async function deleteLaboratory(
       WHERE "id" = ${id}
     `;
 
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/laboratorium");
+    revalidatePath("/dashboard/asesmen");
     return { success: true };
   } catch (error) {
     console.error(`Error deleting laboratory with id ${id}:`, error);

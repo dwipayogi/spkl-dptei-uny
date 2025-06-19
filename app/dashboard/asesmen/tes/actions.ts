@@ -197,6 +197,8 @@ export async function saveAssessmentAnswers(
 
       // Revalidate the asesmen page path to show updated data
       revalidatePath("/dashboard/asesmen");
+      revalidatePath("/dashboard/laboratorium");
+      revalidatePath("/dashboard/asesmen/view");
 
       return { success: true };
     } catch (error) {
