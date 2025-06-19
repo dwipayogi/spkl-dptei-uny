@@ -2,7 +2,6 @@ import {
   getAssessmentQuestions,
   getLaboratory,
   getAssessmentPeriod,
-  initializeAssessmentQuestions,
   getAssessmentAnswersByLabAndPeriod,
 } from "./actions";
 import AssessmentForm from "./components/AssessmentForm";
@@ -10,13 +9,12 @@ import AssessmentForm from "./components/AssessmentForm";
 export default async function AsesmenTestPage({
   searchParams,
 }: {
-  searchParams: { labId?: string; periodId?: string };
+  searchParams: Promise<{ labId?: string; periodId?: string }>;
 }) {
   // Check if labId and periodId are provided
-  const labId = searchParams.labId ? parseInt(searchParams.labId) : null;
-  const periodId = searchParams.periodId
-    ? parseInt(searchParams.periodId)
-    : null;
+  const params = await searchParams;
+  const labId = params.labId ? parseInt(params.labId) : null;
+  const periodId = params.periodId ? parseInt(params.periodId) : null;
 
   // Fetch assessment questions from database
   const questions = await getAssessmentQuestions();

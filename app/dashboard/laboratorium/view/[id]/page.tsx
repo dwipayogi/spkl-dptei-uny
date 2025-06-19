@@ -13,15 +13,16 @@ import { getLaboratory } from "../../actions";
 import { formatDate } from "@/lib/utils";
 
 interface ViewLaboratoryPageParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function ViewLaboratoryPage({
   params,
 }: ViewLaboratoryPageParams) {
-  const id = parseInt(params.id, 10);
+  const { id: idParam } = await params;
+  const id = parseInt(idParam, 10);
 
   if (isNaN(id)) {
     notFound();

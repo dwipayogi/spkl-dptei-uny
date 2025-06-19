@@ -9,10 +9,11 @@ import ViewDocumentButton from "./components/ViewDocumentButton";
 export default async function LabAssessmentViewPage({
   searchParams,
 }: {
-  searchParams: { labId?: string };
+  searchParams: Promise<{ labId?: string }>;
 }) {
   // Check if labId is provided
-  const labId = searchParams.labId ? parseInt(searchParams.labId) : null;
+  const params = await searchParams;
+  const labId = params.labId ? parseInt(params.labId) : null;
 
   // If no labId, show error message
   if (!labId) {

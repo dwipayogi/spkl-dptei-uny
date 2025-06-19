@@ -3,15 +3,16 @@ import LaboratoryForm from "../../components/LaboratoryForm";
 import { getLaboratory } from "../../actions";
 
 interface EditLaboratoryPageParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EditLaboratoryPage({
   params,
 }: EditLaboratoryPageParams) {
-  const id = parseInt(params.id, 10);
+  const { id: idParam } = await params;
+  const id = parseInt(idParam, 10);
 
   if (isNaN(id)) {
     notFound();

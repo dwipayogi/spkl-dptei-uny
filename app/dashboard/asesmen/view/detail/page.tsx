@@ -7,11 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
-import {
-  FiArrowLeft,
-  FiFileText,
-  FiDownload,
-} from "react-icons/fi";
+import { FiArrowLeft, FiFileText, FiDownload } from "react-icons/fi";
 import {
   Table,
   TableBody,
@@ -37,13 +33,12 @@ function getAnswerColor(answer: string): string {
 export default async function AssessmentDetailPage({
   searchParams,
 }: {
-  searchParams: { labId?: string; periodId?: string };
+  searchParams: Promise<{ labId?: string; periodId?: string }>;
 }) {
   // Check if labId and periodId are provided
-  const labId = searchParams.labId ? parseInt(searchParams.labId) : null;
-  const periodId = searchParams.periodId
-    ? parseInt(searchParams.periodId)
-    : null;
+  const params = await searchParams;
+  const labId = params.labId ? parseInt(params.labId) : null;
+  const periodId = params.periodId ? parseInt(params.periodId) : null;
 
   // If missing required parameters, show error
   if (!labId || !periodId) {

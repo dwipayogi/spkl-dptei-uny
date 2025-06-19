@@ -24,10 +24,11 @@ async function getAssessmentDocument(id: number, periodId: number) {
 export default async function AssessmentDocumentPreviewPage({
   params,
 }: {
-  params: { id: string; periodId: string };
+  params: Promise<{ id: string; periodId: string }>;
 }) {
-  const labId = parseInt(params.id);
-  const periodId = parseInt(params.periodId);
+  const { id, periodId: periodIdParam } = await params;
+  const labId = parseInt(id);
+  const periodId = parseInt(periodIdParam);
 
   // Fetch the assessment answer that contains the document
   const document = await getAssessmentDocument(labId, periodId);
