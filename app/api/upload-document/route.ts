@@ -1,5 +1,6 @@
 import { put } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import sql from "@/db/db";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -83,6 +84,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     `;
 
     if (result && result.length > 0) {
+      revalidatePath("/dashboard/dokumen");
+      revalidatePath("/dashboard");
       return NextResponse.json({
         success: true,
         document: {
