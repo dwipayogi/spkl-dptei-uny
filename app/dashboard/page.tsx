@@ -1,111 +1,169 @@
 "use client";
 
-import { Pie, PieChart } from "recharts";
+import { FiList, FiFileText, FiCheckCircle } from "react-icons/fi";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  getDashboardStats,
+  getLabComplianceData,
+  LabComplianceData,
+} from "./actions";
+import { useEffect, useState } from "react";
 import {
-  ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+  StatCard,
+  ComplianceCategoryChart,
+  ComplianceStatusChart,
+  LabComplianceBarChart,
+} from "./components";
 
-import { FiList } from "react-icons/fi";
-
-const chartData = [
-  { label: "tinggi", laboratorium: 4, fill: "var(--color-tinggi)" },
-  { label: "sedang", laboratorium: 2, fill: "var(--color-sedang)" },
-  { label: "rendah", laboratorium: 1, fill: "var(--color-rendah)" },
-];
-const chartConfig = {
-  laboratorium: {
-    label: "laboratorium",
-  },
-  tinggi: {
-    label: "tinggi (>90%)",
-    color: "var(--chart-1)",
-  },
-  sedang: {
-    label: "sedang (70-90%)",
-    color: "var(--chart-2)",
-  },
-  rendah: {
-    label: "rendah (<70%)",
-    color: "var(--chart-3)",
-  },
-} satisfies ChartConfig;
+// Simple reusable no data message component
+const NoDataMessage = () => (
+  <div className="flex items-center justify-center p-8 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
+    <p className="text-gray-500">Tidak ada data tersedia</p>
+  </div>
+);
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState({
+    totalLaboratories: 0,
+    totalDocuments: 0,
+    averageCompliance: 0,
+    complianceCounts: {
+      high: 0,
+      medium: 0,
+      low: 0,
+    },
+  });
+  const [complianceData, setComplianceData] = useState<{
+    compliant: LabComplianceData[];
+    nonCompliant: LabComplianceData[];
+  }>({
+    compliant: [],
+    nonCompliant: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [complianceThreshold] = useState(80); // Default threshold at 80%
+
+  const chartData = [
+    {
+      label: "tinggi",
+      laboratorium: stats.complianceCounts.high || 0,
+    },
+    {
+      label: "sedang",
+      laboratorium: stats.complianceCounts.medium || 0,
+    },
+    {
+      label: "rendah",
+      laboratorium: stats.complianceCounts.low || 0,
+    },
+  ];
+
+  // Data for compliance status chart
+  const statusChartData = [
+    { name: "Memenuhi", value: complianceData.compliant.length },
+    { name: "Belum Memenuhi", value: complianceData.nonCompliant.length },
+  ];
+
+  // Data for bar chart showing individual lab compliance
+  const labBarChartData = [
+    ...complianceData.compliant.map((lab) => ({
+      name: lab.name,
+      percentage: lab.percentage,
+      status: "Memenuhi",
+    })),
+    ...complianceData.nonCompliant.map((lab) => ({
+      name: lab.name,
+      percentage: lab.percentage,
+      status: "Belum Memenuhi",
+    })),
+  ].sort((a, b) => b.percentage - a.percentage);
+
+  // Check if there's any data to display
+  const hasLabData = stats.totalLaboratories > 0;
+  const hasCategoryData = chartData.some((item) => item.laboratorium > 0);
+  const hasStatusData = statusChartData.some((item) => item.value > 0);
+  const hasLabBarData = labBarChartData.length > 0;
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const [statsData, complianceData] = await Promise.all([
+          getDashboardStats(),
+          getLabComplianceData(complianceThreshold),
+        ]);
+
+        setStats(statsData);
+        setComplianceData(complianceData);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [complianceThreshold]);
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="flex items-center border rounded-lg p-2 lg:p-6 bg-white shadow-sm">
-          <div className="flex items-center justify-center bg-blue-100 rounded-lg p-2 lg:p-4 mr-4">
-            <FiList className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12" />
-          </div>
-          <div>
-            <h3 className="text-3xl lg:text-5xl font-bold text-blue-600">12</h3>
-            <p className="text-sm lg:text-lg text-gray-800">
-              Total Laboratorium
-            </p>
-          </div>
-        </div>
+        <StatCard
+          icon={FiList}
+          value={stats.totalLaboratories}
+          label="Total Laboratorium"
+          loading={loading}
+        />
 
-        <div className="flex items-center border rounded-lg p-2 lg:p-6 bg-white shadow-sm">
-          <div className="flex items-center justify-center bg-blue-100 rounded-lg p-2 lg:p-4 mr-4">
-            <FiList className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12" />
-          </div>
-          <div>
-            <h3 className="text-3xl lg:text-5xl font-bold text-blue-600">
-              90%
-            </h3>
-            <p className="text-sm lg:text-lg text-gray-800">Total Kepatuhan</p>
-          </div>
-        </div>
+        <StatCard
+          icon={FiCheckCircle}
+          value={`${stats.averageCompliance}%`}
+          label="Total Kesesuaian"
+          loading={loading}
+        />
 
-        <div className="flex items-center border rounded-lg p-2 lg:p-6 bg-white shadow-sm">
-          <div className="flex items-center justify-center bg-blue-100 rounded-lg p-2 lg:p-4 mr-4">
-            <FiList className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12" />
-          </div>
-          <div>
-            <h3 className="text-3xl lg:text-5xl font-bold text-blue-600">3</h3>
-            <p className="text-sm lg:text-lg text-gray-800">Total Dokumen</p>
-          </div>
-        </div>
+        <StatCard
+          icon={FiFileText}
+          value={stats.totalDocuments}
+          label="Total Dokumen"
+          loading={loading}
+        />
       </div>
 
-      {/* Chart Section */}
-      <Card className="flex flex-col">
-        <CardHeader className="items-center pb-0">
-          <CardTitle>Data Kepatuhan Lab</CardTitle>
-          <CardDescription>Berdasarkan kategori</CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1 pb-0">
-          <ChartContainer
-            config={chartConfig}
-            className="mx-auto aspect-square max-h-[300px]"
-          >
-            <PieChart>
-              <ChartTooltip
-                content={<ChartTooltipContent nameKey="label" />}
-              />
-              <Pie data={chartData} dataKey="laboratorium" />
-              <ChartLegend
-                content={<ChartLegendContent nameKey="label" />}
-                className="-translate-y-2 flex-wrap gap-2 *:basis-1/4 *:justify-center"
-              />
-            </PieChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+      {/* Chart grid container */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Chart Section - Kategori Kepatuhan */}
+        {!loading && !hasCategoryData ? (
+          <NoDataMessage />
+        ) : (
+          <ComplianceCategoryChart loading={loading} chartData={chartData} />
+        )}
+
+        {/* Chart Section - Status Kepatuhan */}
+        {!loading && !hasStatusData ? (
+          <NoDataMessage />
+        ) : (
+          <ComplianceStatusChart
+            loading={loading}
+            statusChartData={statusChartData}
+            complianceThreshold={complianceThreshold}
+            totalLabs={
+              complianceData.compliant.length +
+              complianceData.nonCompliant.length
+            }
+          />
+        )}
+      </div>
+
+      {/* Bar Chart for individual lab compliance */}
+      {!loading && !hasLabBarData ? (
+        <NoDataMessage />
+      ) : (
+        <LabComplianceBarChart
+          labBarChartData={labBarChartData}
+          complianceThreshold={complianceThreshold}
+        />
+      )}
     </div>
   );
 }
