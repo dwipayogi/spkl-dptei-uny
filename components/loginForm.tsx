@@ -39,16 +39,21 @@ export function LoginForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
+        credentials: "include", // Important for cookies
       });
 
       const data = await response.json();
       setIsLoading(false);
+
       if (!response.ok) {
         setError(data.error || "Terjadi kesalahan saat masuk");
         return;
       }
+
       // Login successful, redirect to dashboard
       router.push("/dashboard");
+      // Force a refresh to ensure the middleware picks up the new auth state
+      router.refresh();
     } catch (err) {
       setIsLoading(false);
       setError("Terjadi kesalahan saat masuk");
