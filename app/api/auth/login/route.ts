@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyPassword } from "@/lib/auth";
+import { verifyPassword, generateToken, setTokenCookie } from "@/lib/auth";
 import sql from "@/db/db";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -46,15 +46,26 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { error: "Email atau kata sandi salah" },
         { status: 401 }
       );
-    }
-
-    // Remove password from the response
+    } // Remove password from the response
     const { password: _, ...userWithoutPassword } = user;
 
-    return NextResponse.json({
+    // Generate JWT token
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    // Create response
+    const response = NextResponse.json({
       message: "Login berhasil",
       user: userWithoutPassword,
     });
+
+    // Set JWT token in cookie
+    setTokenCookie(response, token);
+
+    return response;
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(
