@@ -39,10 +39,11 @@ export function LoginForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
-        credentials: "include", // Important for cookies
       });
 
       const data = await response.json();
+      localStorage.setItem("name", data.name);
+      localStorage.setItem("email", data.email);
       setIsLoading(false);
 
       if (!response.ok) {

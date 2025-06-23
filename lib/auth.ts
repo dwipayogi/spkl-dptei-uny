@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
-import jsonwebtoken from "jsonwebtoken";
-import { cookies } from 'next/headers'
+import jwt from "jsonwebtoken";
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = await bcrypt.genSalt(10);
@@ -16,17 +15,29 @@ export async function verifyPassword(
 
 export function generateToken(user: { id: number; email: string }): string {
   const secret = process.env.JWT_SECRET || "default_secret_key";
-  return jsonwebtoken.sign({ id: user.id, email: user.email }, secret, {
+  return jwt.sign({ id: user.id, email: user.email }, secret, {
     expiresIn: "1d", // Token valid for 1 day
   });
 }
 
-export function verifyToken(token: string): { id: number; email: string } | null {
+export function verifyToken(token: string): {
+  valid: boolean;
+  expired: boolean;
+  payload: { id: number; email: string } | null;
+} {
   const secret = process.env.JWT_SECRET || "default_secret_key";
   try {
-    return jsonwebtoken.verify(token, secret) as { id: number; email: string };
-  } catch (error) {
-    console.error("Token verification error:", error);
-    return null;
+    const decoded = jwt.verify(token, secret) as { id: number; email: string };
+    return {
+      valid: true,
+      expired: false,
+      payload: decoded,
+    };
+  } catch (error: any) {
+    return {
+      valid: false,
+      expired: error.name === "TokenExpiredError",
+      payload: null,
+    };
   }
 }

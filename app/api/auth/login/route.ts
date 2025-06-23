@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPassword, generateToken } from "@/lib/auth";
-import { cookies } from 'next/headers'
 import sql from "@/db/db";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -49,6 +48,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    // Update the user's accessedAt timestamp
+    await sql`
+      UPDATE "User" 
+      SET "accessedAt" = NOW() 
+      WHERE "id" = ${user.id}
+    `;
+
     // Generate JWT token
     const token = generateToken({ id: user.id, email: user.email });
 
@@ -62,13 +68,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
 
-    // Set token in cookies
-    const cookieStore = await cookies();
-    cookieStore.set("token", token, {
+    // Set the JWT token in HTTP-only cookie
+    response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 60 * 60 * 24, // 1 day
+      maxAge: 60 * 60 * 24, // 1 day in seconds
       path: "/",
     });
 

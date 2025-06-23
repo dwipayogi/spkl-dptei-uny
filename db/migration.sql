@@ -8,6 +8,7 @@ CREATE TABLE "User" (
   "email" VARCHAR NOT NULL,
   "password" VARCHAR NOT NULL,
   "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "accessedAt" TIMESTAMP NOT NULL DEFAULT NOW(),
   "updatedAt" TIMESTAMP NOT NULL
 );
 
