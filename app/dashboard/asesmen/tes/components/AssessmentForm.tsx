@@ -217,11 +217,6 @@ export default function AssessmentForm({
       if (result.success) {
         setSuccessMessage("Asesmen berhasil disimpan!");
         setIsDirty(false);
-
-        // Redirect after a short delay
-        setTimeout(() => {
-          router.push(`/dashboard/asesmen`);
-        }, 2000);
       } else {
         setSubmitError(result.error || "Gagal menyimpan asesmen");
       }

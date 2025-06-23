@@ -27,44 +27,37 @@ export function RegisterForm() {
     e.preventDefault();
     setError("");
 
-    // Validasi password
-    if (formData.password !== formData.confirmPassword) {
-      setError("Konfirmasi password tidak cocok");
+    // Validation checks
+    if (!formData.name.trim()) {
+      setError("Nama lengkap harus diisi");
       return;
     }
 
-    // Validasi password minimal 8 karakter
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Format email tidak valid");
+      return;
+    }
+
     if (formData.password.length < 8) {
       setError("Password minimal 8 karakter");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Konfirmasi password tidak cocok");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Registrasi gagal");
-      }
-
-      // Redirect ke dashboard
-      router.push("/dashboard");
-      router.refresh();
-    } catch (error: any) {
-      setError(error.message);
+      // API call would go here
+      console.log("Form validated successfully", formData);
+      // router.push("/auth/login");
+    } catch (err) {
+      setError("Terjadi kesalahan saat mendaftar");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +71,12 @@ export function RegisterForm() {
           Isi formulir di bawah ini untuk membuat akun baru
         </p>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-md text-sm">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div className="grid gap-4">
@@ -135,7 +134,11 @@ export function RegisterForm() {
             />
           </div>
 
-          <Button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          >
             {isLoading ? "Memproses..." : "Daftar"}
           </Button>
         </div>

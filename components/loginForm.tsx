@@ -17,32 +17,28 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Validation checks
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Format email tidak valid");
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Password harus diisi");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Login gagal");
-      }
-
-      // Simpan token di localStorage atau sessionStorage
-      // localStorage.setItem("token", data.token);
-      // localStorage.setItem("user", JSON.stringify(data.user));
-
-      // Redirect ke dashboard atau halaman utama
-      router.push("/dashboard");
-      router.refresh();
-    } catch (error: any) {
-      setError(error.message);
+      // API call would go here
+      console.log("Form validated successfully", { email, password });
+      // router.push("/dashboard");
+    } catch (err) {
+      setError("Email atau password salah");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +52,12 @@ export function LoginForm() {
           Masukkan email dan password untuk masuk ke akun Anda
         </p>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-md text-sm">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div className="grid gap-4">

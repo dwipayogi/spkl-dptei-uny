@@ -81,6 +81,3 @@ CREATE INDEX "assessment_answer_period_id_idx" ON "AssessmentAnswer" ("period_id
 CREATE INDEX "assessment_period_date_range_idx" ON "AssessmentPeriod" ("startDate", "endDate");
 CREATE INDEX "document_title_idx" ON "Document" ("title");
 CREATE INDEX "document_category_idx" ON "Document" ("category");
-
-ALTER TABLE "User"
-DROP COLUMN "token";
