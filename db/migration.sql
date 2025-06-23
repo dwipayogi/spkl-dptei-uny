@@ -1,5 +1,16 @@
 -- Migration script for creating the database schema
 
+
+-- Create User Table
+CREATE TABLE "User" (
+  "id" SERIAL PRIMARY KEY,
+  "name" VARCHAR NOT NULL,
+  "email" VARCHAR NOT NULL,
+  "password" VARCHAR NOT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "updatedAt" TIMESTAMP NOT NULL
+);
+
 -- Create Laboratory table
 CREATE TABLE "Laboratory" (
   "id" SERIAL PRIMARY KEY,
@@ -70,3 +81,6 @@ CREATE INDEX "assessment_answer_period_id_idx" ON "AssessmentAnswer" ("period_id
 CREATE INDEX "assessment_period_date_range_idx" ON "AssessmentPeriod" ("startDate", "endDate");
 CREATE INDEX "document_title_idx" ON "Document" ("title");
 CREATE INDEX "document_category_idx" ON "Document" ("category");
+
+ALTER TABLE "User"
+DROP COLUMN "token";

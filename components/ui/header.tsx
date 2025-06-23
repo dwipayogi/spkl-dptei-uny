@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiBell, FiUser, FiSettings, FiLogOut } from "react-icons/fi";
 
 interface HeaderProps {
@@ -15,10 +15,25 @@ export default function Header({
   avatarUrl,
 }: HeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [realUserName, setRealUserName] = useState(username);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (!res.ok) throw new Error("Failed to fetch user data");
+        const data = await res.json();
+        setRealUserName(data.user.name);
+      } catch {
+        // handle error if needed
+      }
+    }
+    fetchUser();
+  }, []);
 
   return (
     <header className="bg-white shadow-sm px-6 py-2 flex items-center justify-end">
@@ -49,7 +64,9 @@ export default function Header({
               )}
             </div>
             <div className="hidden md:block text-left">
-              <p className="text-sm font-medium text-gray-700">{username}</p>
+              <p className="text-sm font-medium text-gray-700">
+                {realUserName}
+              </p>
               <p className="text-xs text-gray-500">{userRole}</p>
             </div>
           </button>
@@ -59,7 +76,7 @@ export default function Header({
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
               {" "}
               <div className="px-4 py-2 border-b border-gray-100">
-                <p className="text-sm font-semibold">{username}</p>
+                <p className="text-sm font-semibold">{realUserName}</p>
                 <p className="text-xs text-gray-500">{userRole}</p>
               </div>
               <a
