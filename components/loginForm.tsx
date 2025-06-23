@@ -33,14 +33,26 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      // API call would go here
-      console.log("Form validated successfully", { email, password });
-      // router.push("/dashboard");
-    } catch (err) {
-      setError("Email atau password salah");
-      console.error(err);
-    } finally {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
       setIsLoading(false);
+      if (!response.ok) {
+        setError(data.error || "Terjadi kesalahan saat masuk");
+        return;
+      }
+      // Login successful, redirect to dashboard
+      router.push("/dashboard");
+    } catch (err) {
+      setIsLoading(false);
+      setError("Terjadi kesalahan saat masuk");
+      console.error(err);
     }
   };
 

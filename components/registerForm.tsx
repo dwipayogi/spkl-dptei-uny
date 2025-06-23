@@ -52,14 +52,30 @@ export function RegisterForm() {
     setIsLoading(true);
 
     try {
-      // API call would go here
-      console.log("Form validated successfully", formData);
-      // router.push("/auth/login");
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+      setIsLoading(false);
+      if (!response.ok) {
+        setError(data.error || "Terjadi kesalahan saat mendaftar");
+        return;
+      }
+      // Registration successful, redirect to login
+      router.push("/auth/login");
     } catch (err) {
+      setIsLoading(false);
       setError("Terjadi kesalahan saat mendaftar");
       console.error(err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
