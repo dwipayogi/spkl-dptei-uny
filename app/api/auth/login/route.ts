@@ -66,15 +66,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         name: user.name,
         email: user.email,
       },
-    });
-
-    // Set the JWT token in HTTP-only cookie
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24, // 1 day in seconds
-      path: "/",
+      token,
     });
 
     return response;

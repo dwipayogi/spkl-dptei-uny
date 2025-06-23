@@ -31,19 +31,19 @@ export default function DashboardLayout({
     return () => window.removeEventListener("resize", checkWidth);
   }, []);
   return (
-    <div className="flex min-h-screen">
-      <Sidebar onCollapseChange={setIsSidebarCollapsed} />
-      <main
-        className={`flex-1 flex flex-col transition-all duration-300 ${
-          isSidebarCollapsed ? "ml-16" : "ml-64"
-        }`}
-      >
-        {/* Header */}
-        <Header username="Admin SPKL" userRole="Administrator Sistem" />
+      <div className="flex min-h-screen">
+        <Sidebar onCollapseChange={setIsSidebarCollapsed} />
+        <main
+          className={`flex-1 flex flex-col transition-all duration-300 ${
+            isSidebarCollapsed ? "ml-16" : "ml-64"
+          }`}
+        >
+          {/* Header */}
+          <Header username="Admin SPKL" userRole="Administrator Sistem" />
 
-        {/* Page Content */}
-        <div className="flex-1 p-6">{children}</div>
-      </main>
-    </div>
+          {/* Page Content */}
+          <div className="flex-1 p-6">{children}</div>
+        </main>
+      </div>
   );
 }

@@ -42,8 +42,8 @@ export function LoginForm() {
       });
 
       const data = await response.json();
-      localStorage.setItem("name", data.name);
-      localStorage.setItem("email", data.email);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token || "");
       setIsLoading(false);
 
       if (!response.ok) {
