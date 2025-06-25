@@ -17,7 +17,7 @@ export type LaboratoryFormData = {
   name: string;
   person: string;
   percentage: number;
-  lastInspection: string;
+  lastInspection?: string;
 };
 
 export async function getLaboratories(): Promise<Laboratory[]> {

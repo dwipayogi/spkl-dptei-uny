@@ -13,7 +13,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import LaboratoryDeleteDialog from "./LaboratoryDeleteDialog";
+import EditLaboratoryDialog from "./EditLaboratoryDialog";
 import { useRouter } from "next/navigation";
+import { Laboratory } from "../actions";
 
 type MappedLaboratory = {
   id: number;
@@ -27,13 +29,16 @@ type MappedLaboratory = {
 
 interface LaboratoryTableProps {
   laboratories: MappedLaboratory[];
+  allLaboratories: Laboratory[]; // Add this to access original lab data
 }
 
 export default function LaboratoryTable({
   laboratories,
+  allLaboratories,
 }: LaboratoryTableProps) {
   const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedLab, setSelectedLab] = useState<number | null>(null);
 
   const handleDeleteClick = (id: number) => {
@@ -41,17 +46,27 @@ export default function LaboratoryTable({
     setDeleteDialogOpen(true);
   };
 
+  const handleEditClick = (id: number) => {
+    setSelectedLab(id);
+    setEditDialogOpen(true);
+  };
+
   const handleDeleteSuccess = () => {
     router.refresh();
   };
 
-  const handleEditClick = (id: number) => {
-    router.push(`/dashboard/laboratorium/edit/${id}`);
+  const handleEditSuccess = () => {
+    router.refresh();
   };
 
   const handleViewClick = (id: number) => {
     router.push(`/dashboard/laboratorium/view/${id}`);
   };
+
+  // Get the laboratory data for editing
+  const selectedLaboratory = selectedLab
+    ? allLaboratories.find((lab) => lab.id === selectedLab) || null
+    : null;
 
   return (
     <>
@@ -110,13 +125,18 @@ export default function LaboratoryTable({
             </TableRow>
           ))}
         </TableBody>
-      </Table>
-
+      </Table>{" "}
       <LaboratoryDeleteDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         labId={selectedLab}
         onSuccess={handleDeleteSuccess}
+      />
+      <EditLaboratoryDialog
+        laboratory={selectedLaboratory}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSuccess={handleEditSuccess}
       />
     </>
   );

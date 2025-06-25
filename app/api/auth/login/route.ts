@@ -48,10 +48,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    const currentTime = new Date();
+
     // Update the user's accessedAt timestamp
     await sql`
       UPDATE "User" 
-      SET "accessedAt" = NOW() 
+      SET "accessedAt" = ${currentTime} 
       WHERE "id" = ${user.id}
     `;
 

@@ -1,12 +1,10 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
 import { getLaboratories } from "./actions";
 import { formatDate } from "@/lib/utils";
 import LaboratoryTable from "./components/LaboratoryTable";
+import AddLaboratoryDialog from "./components/AddLaboratoryDialog";
 
 export default async function LaboratoriumPage() {
-
   // Get laboratories from database
   const laboratories = await getLaboratories();
 
@@ -20,7 +18,9 @@ export default async function LaboratoriumPage() {
       lab.percentage >= 75
         ? "bg-green-100 text-green-800"
         : "bg-red-100 text-red-800",
-    lastInspection: lab.lastInspection ? formatDate(new Date(lab.lastInspection)) : "-",
+    lastInspection: lab.lastInspection
+      ? formatDate(new Date(lab.lastInspection))
+      : "-",
     instrumentation: lab.percentage,
   }));
 
@@ -37,9 +37,7 @@ export default async function LaboratoriumPage() {
             Kelola dan monitor status laboratorium
           </p>
         </div>
-        <Button asChild className="bg-blue-600 hover:bg-blue-700">
-          <Link href="/dashboard/laboratorium/create">Tambah Laboratorium</Link>
-        </Button>
+        <AddLaboratoryDialog />
       </div>
 
       {/* Laboratory List */}
@@ -54,7 +52,10 @@ export default async function LaboratoriumPage() {
       ) : (
         <Card>
           <CardContent>
-            <LaboratoryTable laboratories={mappedLaboratories} />
+            <LaboratoryTable
+              laboratories={mappedLaboratories}
+              allLaboratories={laboratories}
+            />
           </CardContent>
         </Card>
       )}
