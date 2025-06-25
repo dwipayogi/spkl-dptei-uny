@@ -17,6 +17,7 @@ import {
   formatDate,
 } from "@/lib/blob-config";
 import DocumentDeleteDialog from "./components/DocumentDeleteDialog";
+import DocumentUploadDialog from "./components/DocumentUploadDialog";
 
 export default async function DokumenPage() {
   const documents = await getDocuments();
@@ -33,11 +34,7 @@ export default async function DokumenPage() {
             Kelola dokumen pendukung asesmen laboratorium
           </p>
         </div>
-        <Link href="/dashboard/dokumen/upload">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-            Unggah Dokumen
-          </Button>
-        </Link>
+        <DocumentUploadDialog />
       </div>
 
       {/* Dokumen List */}
@@ -90,9 +87,7 @@ export default async function DokumenPage() {
                 <TableCell>{doc.fileType.toUpperCase()}</TableCell>
                 <TableCell>{formatFileSize(doc.fileSize)}</TableCell>
                 <TableCell>{doc.uploadedBy}</TableCell>
-                <TableCell>
-                  {formatDate(new Date(doc.createdAt))}
-                </TableCell>
+                <TableCell>{formatDate(new Date(doc.createdAt))}</TableCell>
                 <TableCell className="flex space-x-2">
                   <Link
                     href={doc.url}
