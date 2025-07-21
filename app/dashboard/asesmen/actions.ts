@@ -52,34 +52,36 @@ export async function getAssessmentsByPeriod(
       ORDER BY name ASC
     `;
 
+    // Get total questions for calculation
+    const questions = await sql`SELECT COUNT(*) as count FROM "Assessment"`;
+    const totalQuestions = parseInt(questions[0].count);
+
     // For each lab, fetch its assessment data for the specified period
     const labsWithAssessments = await Promise.all(
       labs.map(async (lab) => {
-        // Check if assessment exists for this lab and period
-        const assessmentAnswers = await sql`
+        // Check if consolidated assessment exists for this lab and period
+        const assessmentData = await sql`
           SELECT 
-            ass_id,
-            answer->>'value' as answer_value
+            answer
           FROM "AssessmentAnswer"
           WHERE lab_id = ${lab.labId} 
             AND period_id = ${periodId}
-            AND answer->>'value' != 'notes'
+            AND ("answer"->>'isConsolidated')::boolean = true
+          LIMIT 1
         `;
 
-        // Calculate percentage if assessments exist
+        // Calculate percentage if assessment exists
         let percentage = null;
-        if (assessmentAnswers.length > 0) {
-          // Get total questions for calculation
-          const questions =
-            await sql`SELECT COUNT(*) as count FROM "Assessment"`;
-          const totalQuestions = parseInt(questions[0].count);
+        if (assessmentData.length > 0 && assessmentData[0].answer) {
+          // Extract responses from the consolidated answer
+          const responses = assessmentData[0].answer.responses || [];
 
           // Calculate points using same formula as updateLabComplianceLevel
           let points = 0;
-          for (const answer of assessmentAnswers) {
-            if (answer.answer_value === "Ya") {
+          for (const response of responses) {
+            if (response.value === "Ya") {
               points += 1;
-            } else if (answer.answer_value === "Sebagian") {
+            } else if (response.value === "Sebagian") {
               points += 0.5;
             }
             // "Tidak" answers get 0 points

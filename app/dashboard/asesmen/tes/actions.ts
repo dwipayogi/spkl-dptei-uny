@@ -88,7 +88,8 @@ export async function saveAssessmentAnswers(
 
     try {
       // Get the first assessment ID to use as our anchor for consolidated data
-      const firstAssessment = await sql`SELECT MIN(id) as id FROM "Assessment" LIMIT 1`;
+      const firstAssessment =
+        await sql`SELECT MIN(id) as id FROM "Assessment" LIMIT 1`;
       if (!firstAssessment || !firstAssessment[0] || !firstAssessment[0].id) {
         throw new Error("No assessment questions found");
       }
@@ -153,7 +154,9 @@ export async function saveAssessmentAnswers(
       // Update the lab compliance level
       const updateResult = await updateLabComplianceLevel(labId, periodId);
       if (!updateResult.success) {
-        throw new Error(updateResult.error || "Failed to update compliance level");
+        throw new Error(
+          updateResult.error || "Failed to update compliance level"
+        );
       }
 
       // Commit the transaction

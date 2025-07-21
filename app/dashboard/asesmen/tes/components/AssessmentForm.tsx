@@ -225,6 +225,9 @@ export default function AssessmentForm({
       setSubmitError("Terjadi kesalahan saat menyimpan asesmen");
     } finally {
       setIsSubmitting(false);
+      router.push(
+        `/dashboard/asesmen/view/detail?labId=${labId}&periodId=${periodId}`
+      );
     }
   };
 

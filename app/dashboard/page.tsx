@@ -78,7 +78,6 @@ export default function DashboardPage() {
   ].sort((a, b) => b.percentage - a.percentage);
 
   // Check if there's any data to display
-  const hasLabData = stats.totalLaboratories > 0;
   const hasCategoryData = chartData.some((item) => item.laboratorium > 0);
   const hasStatusData = statusChartData.some((item) => item.value > 0);
   const hasLabBarData = labBarChartData.length > 0;
