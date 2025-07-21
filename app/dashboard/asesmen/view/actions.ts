@@ -41,6 +41,7 @@ export async function getLabAssessmentResults(
       FROM "AssessmentPeriod" p
       JOIN "AssessmentAnswer" aa ON p."id" = aa."period_id"
       WHERE aa."lab_id" = ${labId}
+      AND ("answer"->>'isConsolidated')::boolean = true
       ORDER BY p."startDate" DESC
     `;
 
@@ -61,15 +62,15 @@ export async function getLabAssessmentResults(
     // For each period, calculate the assessment percentage
     const results = await Promise.all(
       periods.map(async (period) => {
-        // Get all answers for this lab and period
-        const assessmentAnswers = await sql`
+        // Get the consolidated answers for this lab and period
+        const assessmentData = await sql`
           SELECT 
-            ass_id,
-            answer->>'value' as answer_value
+            answer
           FROM "AssessmentAnswer"
           WHERE lab_id = ${labId} 
             AND period_id = ${period.period_id}
-            AND answer->>'value' != 'notes'
+            AND ("answer"->>'isConsolidated')::boolean = true
+          LIMIT 1
         `;
 
         // Check if there's a document for this assessment
@@ -79,6 +80,7 @@ export async function getLabAssessmentResults(
           WHERE lab_id = ${labId}
             AND period_id = ${period.period_id}
             AND file_url IS NOT NULL
+            AND ("answer"->>'isConsolidated')::boolean = true
           LIMIT 1
         `;
 
@@ -86,19 +88,24 @@ export async function getLabAssessmentResults(
         const questions = await sql`SELECT COUNT(*) as count FROM "Assessment"`;
         const totalQuestions = parseInt(questions[0].count);
 
+        // Extract responses from the consolidated answer
+        const responses = assessmentData[0]?.answer?.responses || [];
+
         // Calculate points using same formula as updateLabComplianceLevel
         let points = 0;
-        for (const answer of assessmentAnswers) {
-          if (answer.answer_value === "Ya") {
+        for (const response of responses) {
+          if (response.value === "Ya") {
             points += 1;
-          } else if (answer.answer_value === "Sebagian") {
+          } else if (response.value === "Sebagian") {
             points += 0.5;
           }
           // "Tidak" answers get 0 points
         }
 
         // Calculate percentage
-        const percentage = Math.round((points / totalQuestions) * 100); // Check if document exists
+        const percentage = Math.round((points / totalQuestions) * 100);
+
+        // Check if document exists
         const hasDocument =
           documentCheck &&
           documentCheck.length > 0 &&
@@ -131,20 +138,43 @@ export async function getLabAssessmentDetails(
   periodId: number
 ): Promise<AssessmentDetailResult[]> {
   try {
-    const results = await sql`
+    // Get all assessment questions
+    const questions = await sql`
       SELECT 
-        a."id",
-        a."code",
-        a."question",
-        aa."answer"->>'value' as answer
-      FROM "Assessment" a
-      JOIN "AssessmentAnswer" aa ON a."id" = aa."ass_id"
-      WHERE aa."lab_id" = ${labId} AND aa."period_id" = ${periodId}
-      AND aa."answer"->>'value' != 'notes'
-      ORDER BY a."code" ASC
+        "id",
+        "code",
+        "question"
+      FROM "Assessment"
+      ORDER BY "code" ASC
     `;
 
-    return results as AssessmentDetailResult[];
+    // Get consolidated answers for this lab and period
+    const consolidatedData = await sql`
+      SELECT 
+        answer
+      FROM "AssessmentAnswer"
+      WHERE "lab_id" = ${labId} 
+        AND "period_id" = ${periodId}
+        AND ("answer"->>'isConsolidated')::boolean = true
+      LIMIT 1
+    `;
+
+    if (!consolidatedData || consolidatedData.length === 0) {
+      return [];
+    }
+
+    const responses = consolidatedData[0].answer.responses || [];
+
+    // Map questions to answers
+    return questions.map((question) => {
+      const response = responses.find((r: any) => r.questionId === question.id);
+      return {
+        id: question.id,
+        code: question.code,
+        question: question.question,
+        answer: response?.value || "Tidak Dijawab",
+      };
+    });
   } catch (error) {
     console.error(
       `Error fetching assessment details for lab ${labId} and period ${periodId}:`,
@@ -165,8 +195,9 @@ export async function getLabAssessmentNotes(
         "notes",
         "file_url"
       FROM "AssessmentAnswer"
-      WHERE "lab_id" = ${labId} AND "period_id" = ${periodId}
-      AND "notes" IS NOT NULL
+      WHERE "lab_id" = ${labId} 
+        AND "period_id" = ${periodId}
+        AND ("answer"->>'isConsolidated')::boolean = true
       LIMIT 1
     `;
 

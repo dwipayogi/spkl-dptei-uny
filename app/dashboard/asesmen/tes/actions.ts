@@ -87,122 +87,85 @@ export async function saveAssessmentAnswers(
     await sql`BEGIN`;
 
     try {
-      // Process each answer
-      for (const answer of answers) {
-        // Check if an answer already exists
-        const existingAnswer = await sql`
-          SELECT "id" FROM "AssessmentAnswer"
-          WHERE "lab_id" = ${labId} 
-            AND "period_id" = ${periodId} 
-            AND "ass_id" = ${answer.questionId}
-        `;
-
-        if (existingAnswer && existingAnswer.length > 0) {
-          // Update existing answer
-          await sql`
-            UPDATE "AssessmentAnswer"
-            SET 
-              "answer" = ${JSON.stringify({ value: answer.value })},
-              "updatedAt" = ${now}
-            WHERE "id" = ${existingAnswer[0].id}
-          `;
-        } else {
-          // Insert new answer
-          await sql`
-            INSERT INTO "AssessmentAnswer" (
-              "lab_id",
-              "ass_id",
-              "period_id",
-              "answer",
-              "createdAt",
-              "updatedAt"
-            )
-            VALUES (
-              ${labId},
-              ${answer.questionId},
-              ${periodId},
-              ${JSON.stringify({ value: answer.value })},
-              ${now},
-              ${now}
-            )
-          `;
-        }
+      // Get the first assessment ID to use as our anchor for consolidated data
+      const firstAssessment = await sql`SELECT MIN(id) as id FROM "Assessment" LIMIT 1`;
+      if (!firstAssessment || !firstAssessment[0] || !firstAssessment[0].id) {
+        throw new Error("No assessment questions found");
       }
 
-      // Store general notes and file URL
-      // First check if notes entry exists (using a dummy questionId of 0)
-      const existingNotes = await sql`
-        SELECT "id" FROM "AssessmentAnswer"
+      const anchorAssessmentId = firstAssessment[0].id;
+
+      // Create a consolidated JSON structure for all answers
+      const consolidatedAnswers = {
+        isConsolidated: true, // Special marker indicating this is consolidated data
+        responses: answers.map((answer) => ({
+          questionId: answer.questionId,
+          value: answer.value,
+        })),
+        updatedAt: now,
+      };
+
+      // Check if a consolidated record already exists
+      const existingRecord = await sql`
+        SELECT "id" FROM "AssessmentAnswer" 
         WHERE "lab_id" = ${labId} 
-          AND "period_id" = ${periodId} 
-          AND "notes" IS NOT NULL
+        AND "period_id" = ${periodId} 
+        AND "ass_id" = ${anchorAssessmentId}
+        AND ("answer"->>'isConsolidated')::boolean = true
       `;
 
-      if (existingNotes && existingNotes.length > 0) {
-        // Update existing notes and file URL
+      if (existingRecord.length > 0) {
+        // Update existing record
         await sql`
-          UPDATE "AssessmentAnswer"
-          SET 
+          UPDATE "AssessmentAnswer" SET
+            "answer" = ${JSON.stringify(consolidatedAnswers)},
             "notes" = ${notes},
             "file_url" = ${fileUrl || null},
             "updatedAt" = ${now}
-          WHERE "id" = ${existingNotes[0].id}
+          WHERE "id" = ${existingRecord[0].id}
         `;
-      } else if (notes || fileUrl) {
-        // Get any assessment id as a reference
-        const assessments = await sql`
-          SELECT "id" FROM "Assessment"
-          LIMIT 1
+      } else {
+        // Insert new record
+        await sql`
+          INSERT INTO "AssessmentAnswer" (
+            "lab_id",
+            "period_id",
+            "ass_id",
+            "answer",
+            "notes",
+            "file_url",
+            "createdAt",
+            "updatedAt"
+          )
+          VALUES (
+            ${labId},
+            ${periodId},
+            ${anchorAssessmentId},
+            ${JSON.stringify(consolidatedAnswers)},
+            ${notes},
+            ${fileUrl || null},
+            ${now},
+            ${now}
+          )
         `;
+      }
 
-        if (assessments && assessments.length > 0) {
-          // Use the first assessment ID as a reference
-          const assId = assessments[0].id;
-
-          // Insert notes as a special entry
-          await sql`
-            INSERT INTO "AssessmentAnswer" (
-              "lab_id",
-              "ass_id",
-              "period_id",
-              "answer",
-              "notes",
-              "file_url",
-              "createdAt",
-              "updatedAt"
-            )
-            VALUES (
-              ${labId},
-              ${assId},
-              ${periodId},
-              ${JSON.stringify({ value: "notes" })},
-              ${notes},
-              ${fileUrl || null},
-              ${now},
-              ${now}
-            )
-          `;
-        }
-      } // Update the lab compliance level using the dedicated function
+      // Update the lab compliance level
       const updateResult = await updateLabComplianceLevel(labId, periodId);
-
       if (!updateResult.success) {
-        throw new Error(
-          updateResult.error || "Failed to update compliance level"
-        );
+        throw new Error(updateResult.error || "Failed to update compliance level");
       }
 
       // Commit the transaction
       await sql`COMMIT`;
 
-      // Revalidate the asesmen page path to show updated data
+      // Revalidate paths
       revalidatePath("/dashboard/asesmen");
       revalidatePath("/dashboard/laboratorium");
       revalidatePath("/dashboard/asesmen/view");
 
       return { success: true };
     } catch (error) {
-      // Rollback in case of any error
       await sql`ROLLBACK`;
       throw error;
     }
@@ -298,49 +261,49 @@ export async function updateLabComplianceLevel(
 ): Promise<{ success: boolean; percentage?: number; error?: string }> {
   try {
     const now = new Date().toISOString();
-
-    // Begin a transaction
     await sql`BEGIN`;
 
     try {
-      // Get all assessment questions to know the total possible points
       const questions = await sql`SELECT COUNT(*) as count FROM "Assessment"`;
       const totalQuestions = parseInt(questions[0].count);
 
       if (totalQuestions === 0) {
         await sql`ROLLBACK`;
-        return {
-          success: false,
-          error: "No assessment questions found",
-        };
+        return { success: false, error: "No assessment questions found" };
       }
 
-      // Get all answers for this lab and period
-      const answers = await sql`
-        SELECT 
-          a."answer"->>'value' as value
-        FROM "AssessmentAnswer" a
-        WHERE a."lab_id" = ${labId} 
-          AND a."period_id" = ${periodId}
-          AND a."answer"->>'value' != 'notes'
+      // Get the consolidated answers
+      const answersResult = await sql`
+        SELECT "answer" 
+        FROM "AssessmentAnswer" 
+        WHERE "lab_id" = ${labId} 
+          AND "period_id" = ${periodId}
+          AND ("answer"->>'isConsolidated')::boolean = true
+        LIMIT 1
       `;
+
+      if (!answersResult || answersResult.length === 0) {
+        await sql`ROLLBACK`;
+        return { success: false, error: "No assessment answers found" };
+      }
+
+      const consolidatedAnswers = answersResult[0].answer;
+      const responses = consolidatedAnswers.responses || [];
 
       // Calculate compliance level
       let points = 0;
-
-      for (const answer of answers) {
-        if (answer.value === "Ya") {
+      for (const response of responses) {
+        if (response.value === "Ya") {
           points += 1;
-        } else if (answer.value === "Sebagian") {
+        } else if (response.value === "Sebagian") {
           points += 0.5;
         }
-        // "Tidak" answers get 0 points
       }
 
-      // Calculate percentage (rounded to nearest integer)
+      // Calculate percentage
       const percentage = Math.round((points / totalQuestions) * 100);
 
-      // Update the laboratory table with the new percentage and lastInspection date
+      // Update the laboratory table
       await sql`
         UPDATE "Laboratory"
         SET 
@@ -350,8 +313,9 @@ export async function updateLabComplianceLevel(
         WHERE "id" = ${labId}
       `;
 
-      // Commit the transaction
-      await sql`COMMIT`; // Revalidate related paths to show updated data
+      await sql`COMMIT`;
+
+      // Revalidate paths
       revalidatePath("/dashboard/asesmen");
       revalidatePath("/dashboard/laboratorium");
       revalidatePath("/dashboard/asesmen/view");
@@ -363,7 +327,6 @@ export async function updateLabComplianceLevel(
 
       return { success: true, percentage };
     } catch (error) {
-      // Rollback in case of any error
       await sql`ROLLBACK`;
       throw error;
     }
