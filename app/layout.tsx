@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AuthProvider } from "@/contexts/auth-context";
+import { UserProvider } from "@/contexts/auth-context";
 
 import { Poppins } from "next/font/google";
 import "./globals.css";
@@ -26,7 +26,7 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} antialiased scroll-smooth`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <UserProvider>{children}</UserProvider>
       </body>
     </html>
   );

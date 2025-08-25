@@ -42,8 +42,6 @@ export function LoginForm() {
       });
 
       const data = await response.json();
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("token", data.token || "");
       setIsLoading(false);
 
       if (!response.ok) {
@@ -53,12 +51,9 @@ export function LoginForm() {
 
       // Login successful, redirect to dashboard
       router.push("/dashboard");
-      // Force a refresh to ensure the middleware picks up the new auth state
-      router.refresh();
     } catch (err) {
       setIsLoading(false);
       setError("Terjadi kesalahan saat masuk");
-      console.error(err);
     }
   };
 
