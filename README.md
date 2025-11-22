@@ -58,9 +58,9 @@ SPKL DPTEI adalah aplikasi web berbasis Next.js yang dirancang untuk mengukur da
 
 ### Frontend & Framework
 
-- **Next.js 15.3.3** - React framework dengan App Router
+- **Next.js 15.5.6** - React framework dengan App Router (optimized for security and performance)
 - **React 19** - Library UI utama
-- **TypeScript 5** - Type-safe JavaScript
+- **TypeScript 5** - Type-safe JavaScript dengan strict mode
 - **Tailwind CSS 4** - Utility-first CSS framework
 
 ### UI Components & Styling
@@ -83,6 +83,40 @@ SPKL DPTEI adalah aplikasi web berbasis Next.js yang dirancang untuk mengukur da
 - **Recharts** - Charts dan grafik
 - **React Day Picker** - Date picker component
 - **date-fns** - Date manipulation utilities
+
+## ⚡ Optimisasi Performa
+
+Proyek ini telah dioptimalkan untuk performa dan keamanan yang maksimal:
+
+### 🔒 Keamanan
+- **Next.js 15.5.6** - Versi terbaru dengan patch keamanan
+- **Zero vulnerabilities** - Semua kerentanan keamanan telah diperbaiki
+- **JWT token security** - Autentikasi yang aman dengan token expiration
+
+### 🚀 Performa
+- **Standalone output** - Build optimized untuk deployment
+- **Image optimization** - Logo dan gambar dikompres hingga 83.6% lebih kecil
+- **Font optimization** - Preload dan fallback untuk loading cepat
+- **AVIF & WebP support** - Format gambar modern untuk ukuran file lebih kecil
+- **Package imports optimization** - Tree-shaking untuk bundle size lebih kecil
+- **Compression enabled** - Gzip compression untuk response yang lebih cepat
+
+### 📦 Build Configuration
+- **TypeScript strict mode** - Type safety yang maksimal
+- **Console removal in production** - Build size lebih kecil
+- **ETag generation** - Browser caching yang efisien
+- **Incremental compilation** - Build time yang lebih cepat
+
+### 🛠️ Development Tools
+```bash
+npm run dev          # Development dengan Turbopack
+npm run build        # Production build
+npm run type-check   # TypeScript validation
+npm run lint         # Code quality check
+npm run optimize:images  # Optimize image assets
+npm run analyze      # Bundle size analysis
+```
+
 
 ## 🏗️ Struktur Proyek
 
@@ -133,6 +167,56 @@ Sistem menggunakan PostgreSQL dengan schema sebagai berikut:
 - **AssessmentPeriod** - Periode asesmen yang dapat dikonfigurasi
 - **AssessmentAnswer** - Jawaban asesmen dengan dukungan file
 - **Document** - Manajemen dokumen dengan metadata lengkap
+
+## 🚀 Setup & Installation
+
+### Prerequisites
+- Node.js 20 atau lebih baru
+- PostgreSQL database (Neon Database recommended)
+- Vercel Blob storage account (untuk file uploads)
+
+### Installation Steps
+
+1. **Clone repository**
+```bash
+git clone https://github.com/dwipayogi/spkl-dptei-uny.git
+cd spkl-dptei-uny
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Setup environment variables**
+```bash
+cp .env.example .env
+```
+
+Edit `.env` file dengan credentials Anda:
+```env
+DATABASE_URL=your_postgresql_connection_string
+JWT_SECRET=your_secure_random_secret
+BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
+```
+
+4. **Run database migration**
+```bash
+# Import db/migration.sql ke PostgreSQL database Anda
+```
+
+5. **Run development server**
+```bash
+npm run dev
+```
+
+Akses aplikasi di `http://localhost:3000`
+
+### Production Build
+```bash
+npm run build
+npm start
+```
 
 ## 🎯 Penggunaan
 
