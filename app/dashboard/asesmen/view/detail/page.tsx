@@ -117,7 +117,7 @@ export default async function AssessmentDetailPage({
   }
 
   // Process assessment statistics
-  const totalQuestions = assessmentDetails.length;
+  // const totalQuestions = assessmentDetails.length;
   const conformingAnswers = assessmentDetails.filter(
     (detail) => detail.answer === "Ya"
   ).length;

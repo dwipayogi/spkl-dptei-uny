@@ -26,8 +26,7 @@ interface AssessmentPeriodItemProps {
 
 export default async function AssessmentPeriodItem({
   period,
-  index,
-}: AssessmentPeriodItemProps) {
+}: Omit<AssessmentPeriodItemProps, 'index'>) {
   // Get assessments for this period
   const labAssessments = await getAssessmentsByPeriod(period.id);
 

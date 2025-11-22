@@ -50,12 +50,10 @@ interface SidebarProps {
 export default function Sidebar({ onCollapseChange }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     // Function to check if screen is mobile size
     const checkIfMobile = () => {
       const isMobileScreen = window.innerWidth < 768;
-      setIsMobile(isMobileScreen);
 
       // Auto-collapse on mobile
       if (isMobileScreen) {

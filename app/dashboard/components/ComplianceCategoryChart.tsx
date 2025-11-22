@@ -47,7 +47,7 @@ export function ComplianceCategoryChart({
                 percent > 0 ? `${label}: ${(percent * 100).toFixed(0)}%` : null
               }
             >
-              {chartData.map((entry, index) => (
+              {chartData.map((_entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
