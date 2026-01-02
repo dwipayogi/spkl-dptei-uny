@@ -43,38 +43,16 @@ const sidebarItems: SidebarItem[] = [
   },
 ];
 
-interface SidebarProps {
-  onCollapseChange?: (collapsed: boolean) => void;
-}
-
-export default function Sidebar({ onCollapseChange }: SidebarProps) {
+export default function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
     // Function to check if screen is mobile size
     const checkIfMobile = () => {
       const isMobileScreen = window.innerWidth < 768;
-      setIsMobile(isMobileScreen);
-
       // Auto-collapse on mobile
-      if (isMobileScreen) {
-        setCollapsed(true);
-
-        // Notify parent component if callback exists
-        if (onCollapseChange) {
-          onCollapseChange(true);
-        }
-      }
-      // Expand on larger screens
-      else {
-        setCollapsed(false);
-
-        // Notify parent component if callback exists
-        if (onCollapseChange) {
-          onCollapseChange(false);
-        }
-      }
+      setCollapsed(isMobileScreen);
     };
 
     // Initial check
@@ -85,22 +63,16 @@ export default function Sidebar({ onCollapseChange }: SidebarProps) {
 
     // Clean up
     return () => window.removeEventListener("resize", checkIfMobile);
-  }, [onCollapseChange]);
-  const toggleSidebar = () => {
-    const newState = !collapsed;
-    setCollapsed(newState);
+  }, []);
 
-    // Notify parent component about the change if callback exists
-    if (onCollapseChange) {
-      onCollapseChange(newState);
-    }
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
   };
 
   return (
     <div
-      className={`bg-white shadow-lg h-full fixed left-0 top-0 z-30 transition-all duration-300 ${
-        collapsed ? "w-16" : "w-64"
-      }`}
+      className={`bg-white shadow-lg h-full fixed left-0 top-0 z-30 transition-all duration-300 ${collapsed ? "w-16" : "w-64"
+        }`}
     >
       {/* Toggle button */}
       <button
@@ -116,14 +88,12 @@ export default function Sidebar({ onCollapseChange }: SidebarProps) {
 
       {/* Header */}
       <div
-        className={`${
-          collapsed ? "p-3" : "p-6"
-        } border-gray-200 transition-all h-20 flex`}
+        className={`${collapsed ? "p-3" : "p-6"
+          } border-gray-200 transition-all h-20 flex`}
       >
         <div
-          className={`flex items-center ${
-            collapsed ? "justify-center" : "space-x-3"
-          }`}
+          className={`flex items-center ${collapsed ? "justify-center" : "space-x-3"
+            }`}
         >
           <Image
             src="/logo-uny.png"
@@ -151,15 +121,13 @@ export default function Sidebar({ onCollapseChange }: SidebarProps) {
               <li key={item.href} className={collapsed ? "text-center" : ""}>
                 <Link
                   href={item.href}
-                  className={`flex ${
-                    collapsed
+                  className={`flex ${collapsed
                       ? "flex-col items-center justify-center py-2"
                       : "items-center space-x-3 px-4 py-3"
-                  } rounded-lg transition-colors ${
-                    isActive
+                    } rounded-lg transition-colors ${isActive
                       ? "bg-blue-100 text-blue-700 font-semibold"
                       : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                    }`}
                 >
                   <Icon
                     className={`${collapsed ? "h-5 w-5 mb-1" : "h-5 w-5"}`}
