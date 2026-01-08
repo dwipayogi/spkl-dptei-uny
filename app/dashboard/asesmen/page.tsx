@@ -42,11 +42,10 @@ export default async function AsesmenPage() {
             collapsible
             className="border px-6 rounded-lg"
           >
-            {periods.map((period, index) => (
+            {periods.map((period) => (
               <AssessmentPeriodItem
                 key={period.id}
                 period={period}
-                index={index}
               />
             ))}
           </Accordion>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FiList, FiFileText, FiCheckCircle } from "react-icons/fi";
+import { memo, useMemo } from "react";
 import {
     ComplianceCategoryChart,
     ComplianceStatusChart,
@@ -27,18 +27,20 @@ interface DashboardChartsProps {
 }
 
 // Simple reusable no data message component
-const NoDataMessage = () => (
+const NoDataMessage = memo(() => (
     <div className="flex items-center justify-center p-8 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
         <p className="text-gray-500">Tidak ada data tersedia</p>
     </div>
-);
+));
+NoDataMessage.displayName = "NoDataMessage";
 
-export default function DashboardCharts({
+function DashboardCharts({
     stats,
     complianceData,
     complianceThreshold,
 }: DashboardChartsProps) {
-    const chartData = [
+    // Memoize chart data to avoid recalculation on re-renders
+    const chartData = useMemo(() => [
         {
             label: "tinggi",
             laboratorium: stats.complianceCounts.high || 0,
@@ -51,16 +53,16 @@ export default function DashboardCharts({
             label: "rendah",
             laboratorium: stats.complianceCounts.low || 0,
         },
-    ];
+    ], [stats.complianceCounts.high, stats.complianceCounts.medium, stats.complianceCounts.low]);
 
-    // Data for compliance status chart
-    const statusChartData = [
+    // Memoize status chart data
+    const statusChartData = useMemo(() => [
         { name: "Memenuhi", value: complianceData.compliant.length },
         { name: "Belum Memenuhi", value: complianceData.nonCompliant.length },
-    ];
+    ], [complianceData.compliant.length, complianceData.nonCompliant.length]);
 
-    // Data for bar chart showing individual lab compliance
-    const labBarChartData = [
+    // Memoize bar chart data with expensive sort operation
+    const labBarChartData = useMemo(() => [
         ...complianceData.compliant.map((lab) => ({
             name: lab.name,
             percentage: lab.percentage,
@@ -71,12 +73,20 @@ export default function DashboardCharts({
             percentage: lab.percentage,
             status: "Belum Memenuhi",
         })),
-    ].sort((a, b) => b.percentage - a.percentage);
+    ].sort((a, b) => b.percentage - a.percentage), [complianceData.compliant, complianceData.nonCompliant]);
 
-    // Check if there's any data to display
-    const hasCategoryData = chartData.some((item) => item.laboratorium > 0);
-    const hasStatusData = statusChartData.some((item) => item.value > 0);
+    // Memoize data presence checks
+    const hasCategoryData = useMemo(() => 
+        chartData.some((item) => item.laboratorium > 0), 
+    [chartData]);
+    
+    const hasStatusData = useMemo(() => 
+        statusChartData.some((item) => item.value > 0), 
+    [statusChartData]);
+    
     const hasLabBarData = labBarChartData.length > 0;
+
+    const totalLabs = complianceData.compliant.length + complianceData.nonCompliant.length;
 
     return (
         <>
@@ -97,10 +107,7 @@ export default function DashboardCharts({
                         loading={false}
                         statusChartData={statusChartData}
                         complianceThreshold={complianceThreshold}
-                        totalLabs={
-                            complianceData.compliant.length +
-                            complianceData.nonCompliant.length
-                        }
+                        totalLabs={totalLabs}
                     />
                 )}
             </div>
@@ -117,3 +124,5 @@ export default function DashboardCharts({
         </>
     );
 }
+
+export default memo(DashboardCharts);

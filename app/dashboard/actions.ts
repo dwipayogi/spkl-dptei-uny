@@ -21,50 +21,28 @@ export interface LabComplianceData {
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   try {
-    // Count total laboratories
-    const labResult = await sql`SELECT COUNT(*) as count FROM "Laboratory"`;
-    const totalLaboratories = parseInt(labResult[0].count);
+    // Use a single query with aggregations for better performance
+    const result = await sql`
+      SELECT 
+        (SELECT COUNT(*) FROM "Laboratory") as total_labs,
+        (SELECT COUNT(*) FROM "Document") as total_docs,
+        COALESCE(AVG("percentage"), 0) as avg_compliance,
+        COUNT(CASE WHEN "percentage" > 90 THEN 1 END) as high_count,
+        COUNT(CASE WHEN "percentage" >= 70 AND "percentage" <= 90 THEN 1 END) as medium_count,
+        COUNT(CASE WHEN "percentage" < 70 THEN 1 END) as low_count
+      FROM "Laboratory"
+    `;
 
-    // Count total documents
-    const docResult = await sql`SELECT COUNT(*) as count FROM "Document"`;
-    const totalDocuments = parseInt(docResult[0].count);
-
-    // Get all laboratories with their compliance percentage
-    const labs = await sql`SELECT "percentage" FROM "Laboratory"`;
-
-    // Calculate average compliance
-    let totalPercentage = 0;
-    let highCount = 0;
-    let mediumCount = 0;
-    let lowCount = 0;
-
-    for (const lab of labs) {
-      const percentage = lab.percentage;
-      totalPercentage += percentage;
-
-      // Categorize based on percentage
-      if (percentage > 90) {
-        highCount++;
-      } else if (percentage >= 70 && percentage <= 90) {
-        mediumCount++;
-      } else {
-        lowCount++;
-      }
-    }
-
-    const averageCompliance =
-      totalLaboratories > 0
-        ? Math.round(totalPercentage / totalLaboratories)
-        : 0;
-
+    const stats = result[0];
+    
     return {
-      totalLaboratories,
-      totalDocuments,
-      averageCompliance,
+      totalLaboratories: parseInt(stats.total_labs),
+      totalDocuments: parseInt(stats.total_docs),
+      averageCompliance: Math.round(parseFloat(stats.avg_compliance)),
       complianceCounts: {
-        high: highCount,
-        medium: mediumCount,
-        low: lowCount,
+        high: parseInt(stats.high_count),
+        medium: parseInt(stats.medium_count),
+        low: parseInt(stats.low_count),
       },
     };
   } catch (error) {
@@ -89,19 +67,20 @@ export async function getLabComplianceData(threshold: number = 80): Promise<{
   try {
     // Get all labs with their names and compliance percentages
     const labs =
-      await sql`SELECT "id", "name", "percentage" FROM "Laboratory" ORDER BY "percentage" DESC`;
+      await sql`SELECT "name", "percentage" FROM "Laboratory" ORDER BY "percentage" DESC`;
 
     const compliant: LabComplianceData[] = [];
     const nonCompliant: LabComplianceData[] = [];
 
     for (const lab of labs) {
+      const isCompliant = lab.percentage >= threshold;
       const labData: LabComplianceData = {
         name: lab.name,
         percentage: lab.percentage,
-        status: lab.percentage >= threshold ? "compliant" : "non-compliant",
+        status: isCompliant ? "compliant" : "non-compliant",
       };
 
-      if (labData.status === "compliant") {
+      if (isCompliant) {
         compliant.push(labData);
       } else {
         nonCompliant.push(labData);

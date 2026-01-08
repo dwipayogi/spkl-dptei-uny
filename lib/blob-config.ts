@@ -90,7 +90,7 @@ export function formatDate(date: Date): string {
 }
 
 // Function to parse document from database
-export function parseDocument(doc: any): ParsedDocument {
+export function parseDocument(doc: DocumentMetadata & { id: number; uploadedBy: string; createdAt: Date; updatedAt: Date }): ParsedDocument {
   return {
     ...doc,
     id: doc.id,
