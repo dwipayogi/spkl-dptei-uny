@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { FiBell, FiUser, FiSettings, FiLogOut } from "react-icons/fi";
 
 interface HeaderProps {
@@ -37,11 +39,13 @@ export default function Header({
             onClick={toggleDropdown}
             className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
           >
-            <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white uppercase">
+            <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white uppercase overflow-hidden">
               {avatarUrl ? (
-                <img
+                <Image
                   src={avatarUrl}
                   alt={username}
+                  width={32}
+                  height={32}
                   className="h-8 w-8 rounded-full object-cover"
                 />
               ) : (
@@ -74,12 +78,12 @@ export default function Header({
               >
                 <FiSettings className="w-4 h-4 mr-2" /> Pengaturan
               </a>
-              <a
+              <Link
                 href="/"
                 className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-t border-gray-100"
               >
                 <FiLogOut className="w-4 h-4 mr-2" /> Keluar
-              </a>
+              </Link>
             </div>
           )}
         </div>

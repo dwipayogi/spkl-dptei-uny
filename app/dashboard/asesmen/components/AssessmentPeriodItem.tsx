@@ -21,12 +21,10 @@ import type { AssessmentPeriod } from "../actions";
 
 interface AssessmentPeriodItemProps {
   period: AssessmentPeriod;
-  index: number;
 }
 
 export default async function AssessmentPeriodItem({
   period,
-  index,
 }: AssessmentPeriodItemProps) {
   // Get assessments for this period
   const labAssessments = await getAssessmentsByPeriod(period.id);

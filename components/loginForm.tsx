@@ -51,7 +51,7 @@ export function LoginForm() {
 
       // Login successful, redirect to dashboard
       router.push("/dashboard");
-    } catch (err) {
+    } catch {
       setIsLoading(false);
       setError("Terjadi kesalahan saat masuk");
     }

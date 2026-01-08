@@ -23,7 +23,7 @@ export default async function AsesmenTestPage({
   const laboratory = labId ? await getLaboratory(labId) : null;
   const period = periodId ? await getAssessmentPeriod(periodId) : null;
   // Get existing answers if any
-  let existingAnswers = await getAssessmentAnswersByLabAndPeriod(
+  const existingAnswers = await getAssessmentAnswersByLabAndPeriod(
     labId || 0,
     periodId || 0
   );

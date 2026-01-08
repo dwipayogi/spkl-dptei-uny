@@ -43,62 +43,62 @@ export async function getAssessmentsByPeriod(
   periodId: number
 ): Promise<AssessmentWithLab[]> {
   try {
-    // Get all labs
-    const labs = await sql`
-      SELECT 
-        id as "labId", 
-        name as "labName"
-      FROM "Laboratory"
-      ORDER BY name ASC
-    `;
+    // Fetch all data in parallel for better performance
+    const [labs, questionsResult, assessmentAnswers] = await Promise.all([
+      // Get all labs
+      sql`
+        SELECT 
+          id as "labId", 
+          name as "labName"
+        FROM "Laboratory"
+        ORDER BY name ASC
+      `,
+      // Get total questions count
+      sql`SELECT COUNT(*) as count FROM "Assessment"`,
+      // Get all consolidated assessments for this period at once
+      sql`
+        SELECT 
+          lab_id as "labId",
+          answer
+        FROM "AssessmentAnswer"
+        WHERE period_id = ${periodId}
+          AND ("answer"->>'isConsolidated')::boolean = true
+      `
+    ]);
 
-    // Get total questions for calculation
-    const questions = await sql`SELECT COUNT(*) as count FROM "Assessment"`;
-    const totalQuestions = parseInt(questions[0].count);
+    const totalQuestions = parseInt(questionsResult[0].count);
 
-    // For each lab, fetch its assessment data for the specified period
-    const labsWithAssessments = await Promise.all(
-      labs.map(async (lab) => {
-        // Check if consolidated assessment exists for this lab and period
-        const assessmentData = await sql`
-          SELECT 
-            answer
-          FROM "AssessmentAnswer"
-          WHERE lab_id = ${lab.labId} 
-            AND period_id = ${periodId}
-            AND ("answer"->>'isConsolidated')::boolean = true
-          LIMIT 1
-        `;
+    // Create a map for O(1) lookup of assessments by lab ID
+    const assessmentMap = new Map<number, { responses: Array<{ value: string }> }>();
+    for (const assessment of assessmentAnswers) {
+      assessmentMap.set(assessment.labId, assessment.answer);
+    }
 
-        // Calculate percentage if assessment exists
-        let percentage = null;
-        if (assessmentData.length > 0 && assessmentData[0].answer) {
-          // Extract responses from the consolidated answer
-          const responses = assessmentData[0].answer.responses || [];
+    // Map labs to their assessment data without additional queries
+    const labsWithAssessments: AssessmentWithLab[] = labs.map((lab) => {
+      const assessment = assessmentMap.get(lab.labId);
+      let percentage: number | null = null;
 
-          // Calculate points using same formula as updateLabComplianceLevel
-          let points = 0;
-          for (const response of responses) {
-            if (response.value === "Ya") {
-              points += 1;
-            } else if (response.value === "Sebagian") {
-              points += 0.5;
-            }
-            // "Tidak" answers get 0 points
+      if (assessment) {
+        const responses = assessment.responses || [];
+        let points = 0;
+        for (const response of responses) {
+          if (response.value === "Ya") {
+            points += 1;
+          } else if (response.value === "Sebagian") {
+            points += 0.5;
           }
-
-          // Calculate percentage
-          percentage = Math.round((points / totalQuestions) * 100);
         }
+        percentage = totalQuestions > 0 ? Math.round((points / totalQuestions) * 100) : 0;
+      }
 
-        return {
-          labId: lab.labId,
-          labName: lab.labName,
-          percentage,
-          periodId,
-        };
-      })
-    );
+      return {
+        labId: lab.labId,
+        labName: lab.labName,
+        percentage,
+        periodId,
+      };
+    });
 
     return labsWithAssessments;
   } catch (error) {

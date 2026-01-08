@@ -58,7 +58,7 @@ export default function DocumentDeleteDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Hapus Dokumen</AlertDialogTitle>
           <AlertDialogDescription>
-            Apakah Anda yakin ingin menghapus dokumen "{documentTitle}"?
+            Apakah Anda yakin ingin menghapus dokumen &quot;{documentTitle}&quot;?
             Tindakan ini tidak dapat dibatalkan.
           </AlertDialogDescription>
         </AlertDialogHeader>

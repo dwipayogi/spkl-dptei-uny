@@ -24,7 +24,7 @@ export async function GET() {
     }
     const user = result[0];
     return NextResponse.json({ user });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ message: "Invalid token" }, { status: 401 });
   }
 }

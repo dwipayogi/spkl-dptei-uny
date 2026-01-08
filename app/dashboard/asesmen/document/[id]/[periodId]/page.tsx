@@ -43,9 +43,6 @@ export default async function AssessmentDocumentPreviewPage({
     return ["pdf"].includes(fileExtension);
   };
 
-  // Extract filename from URL
-  const filename = document.file_url.split("/").pop() || "document";
-
   // Get laboratory name
   const labResult = await sql`
     SELECT "name" FROM "Laboratory" WHERE "id" = ${labId}

@@ -33,10 +33,10 @@ export function verifyToken(token: string): {
       expired: false,
       payload: decoded,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       valid: false,
-      expired: error.name === "TokenExpiredError",
+      expired: error instanceof Error && error.name === "TokenExpiredError",
       payload: null,
     };
   }
